@@ -1,0 +1,160 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+.input-group-lg .input-group-text {
+    background-color: #fff;
+    border-right: none;
+}
+
+.input-group-lg .form-control {
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+}
+
+.input-group-lg .form-control:focus {
+    box-shadow: none;
+    border-color: #dee2e6;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+}
+
+.progress {
+    height: 25px;
+    border-radius: 10px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-list {
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+.file-item {
+    padding: 0.5rem;
+    margin-bottom: 0.25rem;
+    background-color: #fff;
+    border-left: 3px solid #0d6efd;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+}
+
+.ai-analysis-item {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+}
+
+.ai-analysis-item h5 {
+    color: #0d6efd;
+    margin-bottom: 1rem;
+}
+
+.ai-analysis-item pre {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.language-bar {
+    margin-bottom: 1rem;
+}
+
+.language-bar-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.language-bar-progress {
+    height: 20px;
+}
+
+footer {
+    margin-top: auto;
+}
+
+.spinner-border {
+    animation: spinner-border 0.75s linear infinite;
+}
+
+/* Color variations for language bars */
+.lang-python { background-color: #3776ab; }
+.lang-javascript { background-color: #f7df1e; color: #000; }
+.lang-typescript { background-color: #3178c6; }
+.lang-java { background-color: #007396; }
+.lang-cpp { background-color: #00599c; }
+.lang-c { background-color: #555555; }
+.lang-csharp { background-color: #239120; }
+.lang-go { background-color: #00add8; }
+.lang-ruby { background-color: #cc342d; }
+.lang-php { background-color: #777bb4; }
+.lang-swift { background-color: #fa7343; }
+.lang-kotlin { background-color: #7f52ff; }
+.lang-rust { background-color: #dea584; color: #000; }
+.lang-html { background-color: #e34c26; }
+.lang-css { background-color: #1572b6; }
+.lang-default { background-color: #6c757d; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
