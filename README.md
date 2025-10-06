@@ -1,8 +1,6 @@
 # CodeSonor 🔍
 
-**CodeSonor** is an AI-powered web application that analyzes public GitHub repositories to provide instant insights into code structure, language distribution, and code quality. Think of it as a "health-checker" for codebases.
-
-> 📚 **New to CodeSonor?** Check out **[INDEX.md](INDEX.md)** for a complete documentation guide and quick navigation to all resources!
+**CodeSonor** is an AI-powered web application that analyzes public GitHub repositories to provide instant insights into code structure, language distribution, and code quality.
 
 ## Features ✨
 
@@ -35,7 +33,7 @@
 - Python 3.8 or higher
 - pip (Python package manager)
 - A Google Gemini API key ([Get one here](https://makersuite.google.com/app/apikey))
-- (Optional) GitHub Personal Access Token for higher API rate limits
+- A GitHub Personal Access Token ([Get one here](https://github.com/settings/tokens)) - **Required for API access**
 
 ### Step 1: Clone or Download the Repository
 ```bash
@@ -71,12 +69,13 @@ pip install -r requirements.txt
 2. Edit the `.env` file and add your API keys:
    ```env
    GEMINI_API_KEY=your_actual_gemini_api_key_here
-   GITHUB_TOKEN=your_github_token_here  # Optional but recommended
+   GITHUB_TOKEN=your_actual_github_token_here
    ```
 
    **Getting API Keys:**
    - **Gemini API Key**: Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - **GitHub Token** (optional): Visit [GitHub Settings → Developer settings → Personal access tokens](https://github.com/settings/tokens)
+   - **GitHub Token**: Visit [GitHub Settings → Developer settings → Personal access tokens](https://github.com/settings/tokens)
+     - Create a token with `public_repo` scope
 
 ### Step 5: Run the Application
 ```bash
@@ -233,4 +232,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-**Built with ❤️ by Farhan Mir**
+**Developed by Farhan Mir**

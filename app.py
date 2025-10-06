@@ -20,7 +20,7 @@ GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 # Configure Gemini API
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-pro')
+    model = genai.GenerativeModel('gemini-2.5-flash-lite')
 
 # Language extensions mapping
 LANGUAGE_EXTENSIONS = {
@@ -54,7 +54,8 @@ LANGUAGE_EXTENSIONS = {
 def get_github_headers():
     """Get headers for GitHub API requests"""
     headers = {
-        'Accept': 'application/vnd.github.v3+json'
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'CodeSonor-App'
     }
     if GITHUB_TOKEN:
         headers['Authorization'] = f'token {GITHUB_TOKEN}'
@@ -85,10 +86,14 @@ def fetch_repository_contents(owner, repo, path=''):
         print(f"Error fetching repository contents: {e}")
         return None
 
-def get_all_files(owner, repo, path='', files_list=None):
+def get_all_files(owner, repo, path='', files_list=None, max_files=500):
     """Recursively get all files in the repository"""
     if files_list is None:
         files_list = []
+    
+    # Stop if we've reached the limit
+    if len(files_list) >= max_files:
+        return files_list
     
     contents = fetch_repository_contents(owner, repo, path)
     
@@ -96,6 +101,9 @@ def get_all_files(owner, repo, path='', files_list=None):
         return files_list
     
     for item in contents:
+        if len(files_list) >= max_files:
+            break
+            
         if item['type'] == 'file':
             files_list.append({
                 'name': item['name'],
@@ -104,8 +112,11 @@ def get_all_files(owner, repo, path='', files_list=None):
                 'download_url': item.get('download_url')
             })
         elif item['type'] == 'dir':
-            # Recursively fetch directory contents
-            get_all_files(owner, repo, item['path'], files_list)
+            # Skip common directories that aren't needed
+            skip_dirs = ['node_modules', '.git', 'dist', 'build', '__pycache__', 'vendor', 'target']
+            if item['name'] not in skip_dirs:
+                # Recursively fetch directory contents
+                get_all_files(owner, repo, item['path'], files_list, max_files)
     
     return files_list
 
@@ -204,6 +215,16 @@ def index():
     """Serve the frontend"""
     return send_from_directory('static', 'index.html')
 
+@app.route('/favicon.ico')
+def favicon():
+    """Return 204 No Content for favicon requests"""
+    return '', 204
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files (CSS, JS, etc.)"""
+    return send_from_directory('static', path)
+
 @app.route('/analyze', methods=['POST'])
 def analyze_repository():
     """Analyze a GitHub repository"""
@@ -224,6 +245,18 @@ def analyze_repository():
         # Fetch repository info
         repo_info_url = f'https://api.github.com/repos/{owner}/{repo}'
         repo_response = requests.get(repo_info_url, headers=get_github_headers())
+        
+        # Handle authentication errors with helpful message
+        if repo_response.status_code == 401:
+            if not GITHUB_TOKEN or GITHUB_TOKEN == 'your_github_token_here':
+                return jsonify({
+                    'error': 'GitHub authentication required. Please add a GitHub Personal Access Token to your .env file. Visit https://github.com/settings/tokens to create one with public_repo scope.'
+                }), 401
+            else:
+                return jsonify({
+                    'error': 'GitHub token is invalid or expired. Please generate a new token at https://github.com/settings/tokens'
+                }), 401
+        
         repo_response.raise_for_status()
         repo_info = repo_response.json()
         
