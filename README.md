@@ -1,16 +1,8 @@
 # CodeSonor 🔍
 
-**AI-## Features ✨
+**AI-powered GitHub repository analyzer** - Available as both a CLI tool and web application.
 
-- 💾 **Easy Installation** - `pip install codesonor`
-- 🖥️ **Dual Interface** - CLI tool or web application
-- 📊 **Language Analysis** - Distribution breakdown across 20+ languages
-- 🤖 **AI Summaries** - Powered by Google Gemini
-- 📈 **Repository Stats** - Stars, forks, file counts, and more
-- ⚡ **Fast Analysis** - Smart filtering for quick results
-- 🎨 **Beautiful Output** - Rich terminal formatting or Bootstrap UItHub repository analyzer** - Available as both a CLI tool and web application.
-
-[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🚀 Quick Start
@@ -28,6 +20,16 @@ cd CodeSonor
 pip install -r requirements.txt
 python app.py  # Visit http://localhost:5000
 ```
+
+## Features ✨
+
+- 💾 **Easy Installation** - `pip install codesonor`
+- 🖥️ **Dual Interface** - CLI tool or web application
+- 📊 **Language Analysis** - Distribution breakdown across 20+ languages
+- 🤖 **AI Summaries** - Powered by Google Gemini
+- 📈 **Repository Stats** - Stars, forks, file counts, and more
+- ⚡ **Fast Analysis** - Smart filtering for quick results
+- 🎨 **Beautiful Output** - Rich terminal formatting or Bootstrap UI
 
 ## Features ✨
 

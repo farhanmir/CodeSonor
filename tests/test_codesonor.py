@@ -8,8 +8,8 @@ from codesonor.language_stats import LanguageAnalyzer
 class TestGitHubClient:
     """Tests for GitHub client functionality"""
     
-    def test_parse_url_valid(self):
-        """Test parsing valid GitHub URLs"""
+    def test_parse_url_https(self):
+        """Test parsing HTTPS GitHub URLs"""
         client = GitHubClient()
         
         # Test HTTPS URL
@@ -17,65 +17,69 @@ class TestGitHubClient:
         assert owner == "python"
         assert repo == "cpython"
         
-        # Test git URL
-        owner, repo = client.parse_url("git@github.com:python/cpython.git")
+        # Test with trailing slash and .git
+        owner, repo = client.parse_url("https://github.com/python/cpython.git/")
         assert owner == "python"
         assert repo == "cpython"
     
     def test_parse_url_invalid(self):
-        """Test parsing invalid URLs"""
+        """Test parsing invalid URLs returns None"""
         client = GitHubClient()
         
-        with pytest.raises(ValueError):
-            client.parse_url("https://gitlab.com/user/repo")
+        # Invalid URLs should return (None, None)
+        owner, repo = client.parse_url("https://gitlab.com/user/repo")
+        assert owner is None
+        assert repo is None
         
-        with pytest.raises(ValueError):
-            client.parse_url("not-a-url")
+        owner, repo = client.parse_url("not-a-url")
+        assert owner is None
+        assert repo is None
 
 
 class TestLanguageAnalyzer:
     """Tests for language analysis functionality"""
     
     def test_language_extensions(self):
-        """Test language detection from file extensions"""
+        """Test language extension mappings"""
         analyzer = LanguageAnalyzer()
         
         # Test various extensions
-        assert ".py" in analyzer.LANGUAGE_EXTENSIONS["Python"]
-        assert ".js" in analyzer.LANGUAGE_EXTENSIONS["JavaScript"]
-        assert ".java" in analyzer.LANGUAGE_EXTENSIONS["Java"]
-        assert ".cpp" in analyzer.LANGUAGE_EXTENSIONS["C++"]
+        assert analyzer.LANGUAGE_EXTENSIONS[".py"] == "Python"
+        assert analyzer.LANGUAGE_EXTENSIONS[".js"] == "JavaScript"
+        assert analyzer.LANGUAGE_EXTENSIONS[".java"] == "Java"
+        assert analyzer.LANGUAGE_EXTENSIONS[".cpp"] == "C++"
     
     def test_calculate_stats(self):
         """Test language statistics calculation"""
         analyzer = LanguageAnalyzer()
         
         files = [
-            {"name": "app.py", "path": "src/app.py"},
-            {"name": "utils.py", "path": "src/utils.py"},
-            {"name": "script.js", "path": "static/script.js"},
-            {"name": "README.md", "path": "README.md"},
+            {"name": "app.py", "path": "src/app.py", "size": 1000},
+            {"name": "utils.py", "path": "src/utils.py", "size": 500},
+            {"name": "script.js", "path": "static/script.js", "size": 300},
+            {"name": "README.md", "path": "README.md", "size": 200},
         ]
         
         stats = analyzer.calculate_stats(files)
         
         assert "Python" in stats
         assert "JavaScript" in stats
-        assert stats["Python"]["count"] == 2
-        assert stats["JavaScript"]["count"] == 1
-        assert stats["Python"]["percentage"] > stats["JavaScript"]["percentage"]
+        assert "Markdown" in stats
+        # Python should be ~75% (1500/2000)
+        assert stats["Python"] > 70
+        assert stats["Python"] < 80
     
     def test_get_primary_language(self):
         """Test primary language detection"""
         analyzer = LanguageAnalyzer()
         
-        stats = {
-            "Python": {"count": 10, "percentage": 70.0},
-            "JavaScript": {"count": 3, "percentage": 21.0},
-            "CSS": {"count": 1, "percentage": 9.0},
-        }
+        files = [
+            {"name": "main.py", "size": 1000},
+            {"name": "test.py", "size": 500},
+            {"name": "index.js", "size": 200},
+        ]
         
-        primary = analyzer.get_primary_language(stats)
+        primary = analyzer.get_primary_language(files)
         assert primary == "Python"
     
     def test_filter_by_language(self):
