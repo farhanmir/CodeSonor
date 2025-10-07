@@ -123,4 +123,4 @@ class TestImports:
         """Test that package has version"""
         import codesonor
         assert hasattr(codesonor, "__version__")
-        assert codesonor.__version__ == "0.1.0"
+        assert codesonor.__version__ == "0.2.0"
