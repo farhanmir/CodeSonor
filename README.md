@@ -1,15 +1,44 @@
 # CodeSonor 🔍
 
-**CodeSonor** is an AI-powered web application that analyzes public GitHub repositories to provide instant insights into code structure, language distribution, and code quality.
+**AI-## Features ✨
+
+- 💾 **Easy Installation** - `pip install codesonor`
+- 🖥️ **Dual Interface** - CLI tool or web application
+- 📊 **Language Analysis** - Distribution breakdown across 20+ languages
+- 🤖 **AI Summaries** - Powered by Google Gemini
+- 📈 **Repository Stats** - Stars, forks, file counts, and more
+- ⚡ **Fast Analysis** - Smart filtering for quick results
+- 🎨 **Beautiful Output** - Rich terminal formatting or Bootstrap UItHub repository analyzer** - Available as both a CLI tool and web application.
+
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## 🚀 Quick Start
+
+### CLI Tool (Recommended)
+```bash
+pip install codesonor
+codesonor analyze https://github.com/pallets/flask
+```
+
+### Web Application
+```bash
+git clone https://github.com/farhanmir/CodeSonor.git
+cd CodeSonor
+pip install -r requirements.txt
+python app.py  # Visit http://localhost:5000
+```
 
 ## Features ✨
 
-- 📊 **Language Distribution Analysis** - Visual breakdown of programming languages used in the repository
-- 🤖 **AI-Powered Code Summaries** - Automatic documentation generation using Google's Gemini API
+- �️ **Dual Interface** - Use as CLI tool or web application
+- 💾 **Easy Installation** - `pip install codesonor` (after publishing)
+- �📊 **Language Distribution Analysis** - Visual breakdown of programming languages used
+- 🤖 **AI-Powered Code Summaries** - Automatic insights using Google's Gemini API
 - 📈 **Repository Statistics** - File counts, stars, forks, and timeline information
-- 🎨 **Beautiful UI** - Clean, responsive Bootstrap interface
-- ⚡ **Fast Analysis** - Quick insights without reading every line of code
-- 🔒 **Public Repos Only** - Analyzes any public GitHub repository
+- 🎨 **Beautiful Output** - Rich terminal formatting (CLI) or Bootstrap UI (Web)
+- ⚡ **Fast Analysis** - Smart filtering and file limits for quick results
+- 🔒 **Public Repos** - Analyze any public GitHub repository
 
 ## Tech Stack 🛠️
 
@@ -28,6 +57,30 @@
 - **Bootstrap Icons** - Icon library
 
 ## Installation & Setup 🚀
+
+### CLI Installation
+
+```bash
+# Install from PyPI
+pip install codesonor
+
+# Set API keys
+export GEMINI_API_KEY="your_gemini_api_key"
+export GITHUB_TOKEN="your_github_token"
+
+# Use it
+codesonor analyze https://github.com/pallets/flask
+```
+
+Get API keys:
+- **Gemini**: https://makersuite.google.com/app/apikey (Free)
+- **GitHub**: https://github.com/settings/tokens (needs `public_repo` scope)
+
+📖 **Full CLI docs**: See [CLI_README.md](CLI_README.md)
+
+---
+
+### Web App Setup
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -89,6 +142,23 @@ Navigate to `http://localhost:5000` in your web browser.
 
 ## Usage 📖
 
+### CLI Commands
+
+```bash
+# Quick summary (no API keys needed)
+codesonor summary https://github.com/owner/repo
+
+# Full analysis with AI
+codesonor analyze https://github.com/owner/repo
+
+# Advanced options
+codesonor analyze <url> --no-ai              # Skip AI (faster)
+codesonor analyze <url> --max-files 200      # Limit files
+codesonor analyze <url> --json-output out.json  # Export JSON
+```
+
+### Web Interface
+
 1. **Enter Repository URL**: Paste any public GitHub repository URL into the input field
    - Example: `https://github.com/facebook/react`
    - Example: `https://github.com/microsoft/vscode`
@@ -110,16 +180,28 @@ Navigate to `http://localhost:5000` in your web browser.
 
 ```
 CodeSonor/
+├── src/codesonor/         # CLI Package
+│   ├── __init__.py        # Package exports
+│   ├── __main__.py        # CLI entry point
+│   ├── cli.py             # Click-based CLI
+│   ├── analyzer.py        # Main orchestrator
+│   ├── github_client.py   # GitHub API client
+│   ├── language_stats.py  # Language analysis
+│   └── ai_analyzer.py     # Gemini AI integration
+├── static/                # Web App Frontend
+│   ├── index.html         # Main HTML page
+│   ├── style.css          # Custom styles
+│   └── script.js          # JavaScript logic
+├── tests/                 # Test suite
+│   ├── __init__.py
+│   └── test_codesonor.py
 ├── app.py                 # Flask backend server
+├── pyproject.toml         # Package configuration
 ├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variables template
-├── .env                  # Your actual environment variables (git-ignored)
-├── .gitignore            # Git ignore rules
-├── README.md             # This file
-└── static/               # Frontend files
-    ├── index.html        # Main HTML page
-    ├── style.css         # Custom styles
-    └── script.js         # JavaScript logic
+├── .env.example           # Environment variables template
+├── CLI_README.md          # CLI documentation
+├── PUBLISHING.md          # PyPI publishing guide
+└── README.md              # This file
 ```
 
 ## API Endpoints 🔌
@@ -191,45 +273,58 @@ The application recognizes the following file extensions:
 
 ## Troubleshooting 🔧
 
-### "Error fetching repository files"
+### CLI Issues
+
+**Command not found: `codesonor`**
+```bash
+# Use python module instead
+python -m codesonor --help
+```
+
+**Import errors**
+```bash
+# Reinstall the package
+pip install --force-reinstall codesonor
+```
+
+### Web App Issues
+
+**"Error fetching repository files"**
 - Ensure the repository URL is correct and public
 - Check your internet connection
 - Verify GitHub API is accessible
 
-### "AI summary not available"
+**"AI summary not available"**
 - Make sure `GEMINI_API_KEY` is set in `.env` file
 - Verify your API key is valid and active
 - Check if you've exceeded API quota
 
-### Rate Limiting
+### API Issues
+
+**Rate Limiting**
 - GitHub API has rate limits (60 requests/hour without token)
 - Add a `GITHUB_TOKEN` to your `.env` file for higher limits (5000 requests/hour)
 
-## Future Enhancements 🚀
+## Documentation 📚
 
-- [ ] Support for private repositories (with OAuth)
-- [ ] Code quality metrics and linting analysis
-- [ ] Dependency vulnerability scanning
-- [ ] Historical trend analysis
-- [ ] PDF report generation
-- [ ] Comparison between multiple repositories
-- [ ] Docker containerization
+- **[CLI_README.md](CLI_README.md)** - Complete CLI documentation
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development & publishing guide
+- **[QUICKSTART.md](QUICKSTART.md)** - 5-step web app quickstart
 
 ## Contributing 🤝
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and publishing guide.
 
 ## License 📄
 
-This project is open source and available under the [MIT License](LICENSE).
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments 🙏
 
+- Google Gemini for AI analysis
 - GitHub API for repository data
-- Google Gemini for AI-powered analysis
-- Bootstrap for beautiful UI components
-- Flask for the backend framework
+- Bootstrap & Rich for beautiful UIs
 
 ---
 
-**Developed by Farhan Mir**
+**Author**: Farhan Mir | [GitHub](https://github.com/farhanmir)
