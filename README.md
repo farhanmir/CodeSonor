@@ -2,8 +2,10 @@
 
 **AI-powered GitHub repository analyzer** - Available as both a CLI tool and web application.
 
+[![PyPI version](https://img.shields.io/pypi/v/codesonor.svg)](https://pypi.org/project/codesonor/)
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Downloads](https://img.shields.io/pypi/dm/codesonor.svg)](https://pypi.org/project/codesonor/)
 
 ## 🚀 Quick Start
 
