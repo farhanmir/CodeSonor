@@ -13,35 +13,49 @@ pip install codesonor
 
 ## 📋 Prerequisites
 
-You'll need two API keys:
+### API Keys
 
-1. **Google Gemini API Key** (Required)
-   - Get it free at [Google AI Studio](https://makersuite.google.com/app/apikey)
+1. **Google Gemini API Key** (Required for AI analysis)
+   - Get it FREE at [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Click "Create API key"
    
-2. **GitHub Personal Access Token** (Required)
-   - Create at [GitHub Settings → Developer Settings → Personal Access Tokens](https://github.com/settings/tokens)
-   - Needs `public_repo` scope
+2. **GitHub Personal Access Token** (Optional, but recommended to avoid rate limits)
+   - Create at [GitHub Settings → Tokens](https://github.com/settings/tokens)
+   - Click "Generate new token (classic)"
+   - Select scope: `public_repo`
 
 ## ⚙️ Configuration
 
-Set your API keys as environment variables:
-
-### Windows (PowerShell)
-```powershell
-$env:GEMINI_API_KEY = "your_gemini_api_key_here"
-$env:GITHUB_TOKEN = "your_github_token_here"
-```
-
-### Linux/MacOS
+### One-Time Setup (Recommended)
 ```bash
-export GEMINI_API_KEY="your_gemini_api_key_here"
-export GITHUB_TOKEN="your_github_token_here"
+codesonor setup
+```
+This interactive wizard will:
+- ✅ Save your API keys securely in `~/.codesonor/config.json`
+- ✅ Work across all your projects
+- ✅ Never ask for keys again!
+
+### Check Your Configuration
+```bash
+codesonor config
 ```
 
-Or create a `.env` file in your working directory:
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-GITHUB_TOKEN=your_github_token_here
+### Alternative Methods
+
+**Environment Variables** (if you prefer):
+```bash
+# Windows (PowerShell)
+$env:GEMINI_API_KEY = "your_key"
+$env:GITHUB_TOKEN = "your_token"
+
+# Linux/Mac
+export GEMINI_API_KEY="your_key"
+export GITHUB_TOKEN="your_token"
+```
+
+**Per-Command** (override saved config):
+```bash
+codesonor analyze URL --gemini-key YOUR_KEY --github-token YOUR_TOKEN
 ```
 
 ## 📖 Usage

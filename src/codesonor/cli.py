@@ -10,10 +10,12 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich import print as rprint
 
 from .analyzer import RepositoryAnalyzer
+from .config import Config
 from .__init__ import __version__
 
 
 console = Console()
+config_manager = Config()
 
 
 @click.group()
@@ -33,8 +35,8 @@ def cli():
 @click.option('--no-ai', is_flag=True, help='Skip AI analysis (faster)')
 @click.option('--max-files', default=500, help='Maximum files to analyze (default: 500)')
 @click.option('--json-output', is_flag=True, help='Output results as JSON')
-@click.option('--github-token', envvar='GITHUB_TOKEN', help='GitHub Personal Access Token')
-@click.option('--gemini-key', envvar='GEMINI_API_KEY', help='Gemini API key for AI analysis')
+@click.option('--github-token', help='GitHub Personal Access Token (overrides stored config)')
+@click.option('--gemini-key', help='Gemini API key for AI analysis (overrides stored config)')
 def analyze(repo_url, no_ai, max_files, json_output, github_token, gemini_key):
     """
     Analyze a GitHub repository.
@@ -44,14 +46,21 @@ def analyze(repo_url, no_ai, max_files, json_output, github_token, gemini_key):
     Example: codesonor analyze https://github.com/pallets/flask
     """
     try:
-        # Check for required environment variables
+        # Get API keys (priority: CLI option > config file > environment)
         if not github_token:
-            console.print("[yellow]Warning: GITHUB_TOKEN not set. You may hit rate limits.[/yellow]")
-            console.print("[yellow]Set it with: export GITHUB_TOKEN=your_token_here[/yellow]\n")
+            github_token = config_manager.get_github_token()
+        
+        if not gemini_key:
+            gemini_key = config_manager.get_gemini_key()
+        
+        # Check for required keys
+        if not github_token:
+            console.print("[yellow]⚠ GitHub token not configured. You may hit rate limits.[/yellow]")
+            console.print("[yellow]Run 'codesonor setup' to configure your API keys.[/yellow]\n")
         
         if not no_ai and not gemini_key:
-            console.print("[yellow]Warning: GEMINI_API_KEY not set. AI analysis will be skipped.[/yellow]")
-            console.print("[yellow]Set it with: export GEMINI_API_KEY=your_key_here[/yellow]\n")
+            console.print("[yellow]⚠ Gemini API key not configured. AI analysis will be skipped.[/yellow]")
+            console.print("[yellow]Run 'codesonor setup' to configure your API keys.[/yellow]\n")
         
         # Create analyzer
         analyzer = RepositoryAnalyzer(github_token, gemini_key)
@@ -85,7 +94,7 @@ def analyze(repo_url, no_ai, max_files, json_output, github_token, gemini_key):
 
 @cli.command()
 @click.argument('repo_url')
-@click.option('--github-token', envvar='GITHUB_TOKEN', help='GitHub Personal Access Token')
+@click.option('--github-token', help='GitHub Personal Access Token (overrides stored config)')
 def summary(repo_url, github_token):
     """
     Get a quick summary of a repository (no AI analysis).
@@ -95,6 +104,14 @@ def summary(repo_url, github_token):
     Example: codesonor summary https://github.com/pallets/flask
     """
     try:
+        # Get GitHub token from config if not provided
+        if not github_token:
+            github_token = config_manager.get_github_token()
+        
+        if not github_token:
+            console.print("[yellow]⚠ GitHub token not configured. You may hit rate limits.[/yellow]")
+            console.print("[yellow]Run 'codesonor setup' to configure your API keys.[/yellow]\n")
+        
         analyzer = RepositoryAnalyzer(github_token)
         summary_text = analyzer.get_summary(repo_url)
         console.print(summary_text)
@@ -157,5 +174,139 @@ def display_results(result: dict):
     console.print(f"[bold cyan]{'='*70}[/bold cyan]\n")
 
 
+@cli.command()
+def setup():
+    """
+    Interactive setup wizard for API keys.
+    
+    Configure your GitHub and Gemini API keys once - they'll be saved for future use.
+    """
+    console.print("[bold cyan]🔧 CodeSonor Setup Wizard[/bold cyan]\n")
+    
+    # Check current status
+    status = config_manager.get_config_status()
+    
+    console.print("[bold]Current Configuration:[/bold]")
+    
+    # GitHub Token status
+    if status['github_token']['set']:
+        source = status['github_token']['source']
+        console.print(f"  GitHub Token: ✅ Configured (from {source})")
+    else:
+        console.print("  GitHub Token: ❌ Not configured")
+    
+    # Gemini Key status
+    if status['gemini_key']['set']:
+        source = status['gemini_key']['source']
+        console.print(f"  Gemini API Key: ✅ Configured (from {source})")
+    else:
+        console.print("  Gemini API Key: ❌ Not configured")
+    
+    console.print(f"\n[dim]Config file: {status['config_file']}[/dim]\n")
+    
+    # Ask if user wants to configure
+    if status['github_token']['set'] and status['gemini_key']['set']:
+        console.print("[green]✓ All API keys are configured![/green]\n")
+        reconfigure = click.confirm("Do you want to update your keys?", default=False)
+        if not reconfigure:
+            return
+    
+    console.print("[bold yellow]Let's configure your API keys:[/bold yellow]\n")
+    
+    # GitHub Token setup
+    console.print("[bold]1. GitHub Personal Access Token[/bold] (Optional, but recommended)")
+    console.print("   [dim]Without this, you may hit GitHub's rate limits[/dim]")
+    console.print("   • Visit: [cyan]https://github.com/settings/tokens[/cyan]")
+    console.print("   • Click 'Generate new token (classic)'")
+    console.print("   • Select scope: [yellow]public_repo[/yellow]")
+    console.print("   • Copy the token\n")
+    
+    github_token = click.prompt(
+        "Enter your GitHub token (or press Enter to skip)",
+        default="",
+        hide_input=True,
+        show_default=False
+    )
+    
+    # Gemini API Key setup
+    console.print("\n[bold]2. Google Gemini API Key[/bold] (Required for AI analysis)")
+    console.print("   [dim]This enables AI-powered code summaries[/dim]")
+    console.print("   • Visit: [cyan]https://aistudio.google.com/app/apikey[/cyan]")
+    console.print("   • Click 'Create API key'")
+    console.print("   • Copy the key\n")
+    
+    gemini_key = click.prompt(
+        "Enter your Gemini API key (or press Enter to skip)",
+        default="",
+        hide_input=True,
+        show_default=False
+    )
+    
+    # Save configuration
+    if github_token or gemini_key:
+        config_manager.save_config(
+            github_token=github_token if github_token else None,
+            gemini_key=gemini_key if gemini_key else None
+        )
+        
+        console.print("\n[bold green]✓ Configuration saved successfully![/bold green]")
+        console.print(f"[dim]Keys stored in: {status['config_file']}[/dim]\n")
+        
+        if github_token:
+            console.print("  ✓ GitHub token configured")
+        if gemini_key:
+            console.print("  ✓ Gemini API key configured")
+        
+        console.print("\n[bold cyan]You're all set![/bold cyan]")
+        console.print("Try it out: [yellow]codesonor analyze https://github.com/pallets/flask[/yellow]\n")
+    else:
+        console.print("\n[yellow]No keys entered. Run 'codesonor setup' again when ready.[/yellow]\n")
+
+
+@cli.command()
+def config():
+    """
+    Show current configuration status.
+    """
+    status = config_manager.get_config_status()
+    
+    console.print("[bold cyan]📋 CodeSonor Configuration[/bold cyan]\n")
+    
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("API Key", style="cyan")
+    table.add_column("Status", style="green")
+    table.add_column("Source", style="yellow")
+    
+    # GitHub Token
+    github_status = "✅ Configured" if status['github_token']['set'] else "❌ Not set"
+    github_source = status['github_token']['source'] or "-"
+    table.add_row("GitHub Token", github_status, github_source)
+    
+    # Gemini Key
+    gemini_status = "✅ Configured" if status['gemini_key']['set'] else "❌ Not set"
+    gemini_source = status['gemini_key']['source'] or "-"
+    table.add_row("Gemini API Key", gemini_status, gemini_source)
+    
+    console.print(table)
+    console.print(f"\n[dim]Config file: {status['config_file']}[/dim]")
+    
+    if not status['github_token']['set'] or not status['gemini_key']['set']:
+        console.print("\n[yellow]💡 Run 'codesonor setup' to configure missing keys[/yellow]\n")
+
+
+@cli.command()
+def reset():
+    """
+    Clear stored API keys from configuration.
+    """
+    if click.confirm("Are you sure you want to clear all stored API keys?", default=False):
+        config_manager.clear_config()
+        console.print("[green]✓ Configuration cleared successfully[/green]")
+        console.print("\n[dim]Run 'codesonor setup' to reconfigure[/dim]\n")
+    else:
+        console.print("[yellow]Cancelled[/yellow]\n")
+
+
 if __name__ == '__main__':
     cli()
+
