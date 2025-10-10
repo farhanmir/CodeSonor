@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codesonor"
-version = "0.3.0"
-description = "AI-Powered GitHub Repository Analyzer with multi-LLM support - Analyze repositories using Gemini, OpenAI, Claude, Mistral, or Groq"
+version = "0.4.0"
+description = "AI-Powered GitHub Repository Analyzer with multi-LLM support, caching, quality scoring, export formats, watch mode, and interactive dashboard"
 readme = "CLI_README.md"
 authors = [{name = "Farhan Mir", email = "your.email@example.com"}]
 license = {text = "MIT"}
@@ -21,7 +21,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Version Control :: Git",
 ]
-keywords = ["github", "repository", "analyzer", "ai", "code-analysis", "gemini", "cli"]
+keywords = ["github", "repository", "analyzer", "ai", "code-analysis", "gemini", "cli", "quality", "caching"]
 requires-python = ">=3.9"
 dependencies = [
     "requests>=2.31.0",
@@ -29,6 +29,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "click>=8.1.0",
     "rich>=13.0.0",
+    "pyyaml>=6.0.0",
 ]
 
 [project.optional-dependencies]

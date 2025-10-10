@@ -123,7 +123,7 @@ class TestImports:
         """Test that package has version"""
         import codesonor
         assert hasattr(codesonor, "__version__")
-        assert codesonor.__version__ == "0.3.0"
+        assert codesonor.__version__ == "0.4.0"
 
 
 class TestLLMProviders:
@@ -190,3 +190,95 @@ class TestLLMProviders:
         )
         assert analyzer is not None
         assert analyzer.ai is not None
+
+
+class TestNewFeaturesV040:
+    """Tests for new features in v0.4.0"""
+    
+    def test_import_cache_manager(self):
+        """Test importing CacheManager"""
+        from codesonor.cache_manager import CacheManager
+        assert CacheManager is not None
+    
+    def test_import_quality_scorer(self):
+        """Test importing QualityScorer"""
+        from codesonor.quality_scorer import QualityScorer
+        assert QualityScorer is not None
+    
+    def test_import_exporter(self):
+        """Test importing ExportManager"""
+        from codesonor.exporter import ExportManager
+        assert ExportManager is not None
+    
+    def test_import_comparator(self):
+        """Test importing RepositoryComparator"""
+        from codesonor.comparator import RepositoryComparator
+        assert RepositoryComparator is not None
+    
+    def test_import_watcher(self):
+        """Test importing WatchManager"""
+        from codesonor.watcher import WatchManager
+        assert WatchManager is not None
+    
+    def test_import_rules_engine(self):
+        """Test importing RulesEngine"""
+        from codesonor.rules_engine import RulesEngine, Rule
+        assert RulesEngine is not None
+        assert Rule is not None
+    
+    def test_import_language_insights(self):
+        """Test importing LanguageInsights"""
+        from codesonor.language_insights import LanguageInsights
+        assert LanguageInsights is not None
+    
+    def test_import_dashboard(self):
+        """Test importing Dashboard classes"""
+        from codesonor.dashboard import InteractiveDashboard, DashboardSimple
+        assert InteractiveDashboard is not None
+        assert DashboardSimple is not None
+    
+    def test_cache_manager_basic(self):
+        """Test basic cache manager functionality"""
+        from codesonor.cache_manager import CacheManager
+        import tempfile
+        from pathlib import Path
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            cache_mgr = CacheManager(cache_dir=Path(temp_dir))
+            
+            # Test set and get
+            test_data = {"test": "data", "value": 123}
+            cache_mgr.set("/test/repo", test_data, ttl=3600)
+            
+            retrieved = cache_mgr.get("/test/repo")
+            assert retrieved is not None
+            assert retrieved["test"] == "data"
+            assert retrieved["value"] == 123
+            
+            # Test stats
+            stats = cache_mgr.get_stats()
+            assert stats["total_entries"] >= 1
+    
+    def test_exporter_formats(self):
+        """Test export manager format support"""
+        from codesonor.exporter import ExportManager
+        
+        exporter = ExportManager()
+        assert "json" in exporter.supported_formats
+        assert "html" in exporter.supported_formats
+        assert "markdown" in exporter.supported_formats
+    
+    def test_rules_engine_config_template(self):
+        """Test rules engine config template generation"""
+        from codesonor.rules_engine import RulesEngine
+        import tempfile
+        from pathlib import Path
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            rules_engine = RulesEngine(Path(temp_dir))
+            template = rules_engine.generate_config_template()
+            
+            assert template is not None
+            assert "rules:" in template
+            assert "no-print-statements" in template
+            assert "pattern:" in template

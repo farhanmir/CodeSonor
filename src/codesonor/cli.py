@@ -402,6 +402,98 @@ def reset():
         console.print("[yellow]Cancelled[/yellow]\n")
 
 
+@cli.group()
+def cache():
+    """Manage analysis cache."""
+    pass
+
+
+@cache.command('clear')
+@click.option('--repo', help='Clear cache for specific repository path')
+def cache_clear(repo):
+    """Clear analysis cache."""
+    try:
+        from .cache_manager import CacheManager
+        
+        cache_mgr = CacheManager()
+        cache_mgr.clear(repo)
+        
+        if repo:
+            console.print(f"[green]✓ Cache cleared for {repo}[/green]")
+        else:
+            console.print("[green]✓ All cache cleared[/green]")
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}", style="bold red")
+
+
+@cache.command('stats')
+def cache_stats():
+    """Show cache statistics."""
+    try:
+        from .cache_manager import CacheManager
+        
+        cache_mgr = CacheManager()
+        stats = cache_mgr.get_stats()
+        
+        table = Table(title="Cache Statistics", show_header=False)
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="green")
+        
+        table.add_row("Total Entries", str(stats['total_entries']))
+        table.add_row("Active Entries", str(stats['active_entries']))
+        table.add_row("Expired Entries", str(stats['expired_entries']))
+        table.add_row("Total Hits", str(stats['total_hits']))
+        table.add_row("Cache Size", f"{stats['cache_size_mb']} MB")
+        
+        console.print(table)
+        
+        if stats['top_entries']:
+            console.print("\n[bold]Top Cached Repositories:[/bold]")
+            for entry in stats['top_entries']:
+                console.print(f"  • {entry['repo']} ({entry['hits']} hits)")
+        
+        console.print("")
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}", style="bold red")
+
+
+@cache.command('clean')
+def cache_clean():
+    """Remove expired cache entries."""
+    try:
+        from .cache_manager import CacheManager
+        
+        cache_mgr = CacheManager()
+        cache_mgr.clean_expired()
+        
+        console.print("[green]✓ Expired cache entries removed[/green]")
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}", style="bold red")
+
+
+@cli.command('init-rules')
+@click.argument('path', default='.')
+def init_rules(path):
+    """
+    Initialize custom rules configuration file.
+    
+    Creates a .codesonor.yml template in the specified directory.
+    """
+    try:
+        from pathlib import Path
+        from .rules_engine import RulesEngine
+        
+        repo_path = Path(path).resolve()
+        rules_engine = RulesEngine(repo_path)
+        
+        if rules_engine.save_config_template():
+            console.print(f"[green]✓ Created .codesonor.yml in {repo_path}[/green]")
+            console.print("\n[dim]Edit the file to customize rules for your project[/dim]\n")
+        
+    except Exception as e:
+        console.print(f"[red]Error:[/red] {e}", style="bold red")
+
+
 if __name__ == '__main__':
     cli()
 
