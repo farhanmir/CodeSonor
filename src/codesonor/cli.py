@@ -36,8 +36,8 @@ def cli():
 @click.option('--max-files', default=500, help='Maximum files to analyze (default: 500)')
 @click.option('--json-output', is_flag=True, help='Output results as JSON')
 @click.option('--github-token', help='GitHub Personal Access Token (overrides stored config)')
-@click.option('--llm-provider', type=click.Choice(['gemini', 'openai', 'anthropic', 'mistral', 'groq'], case_sensitive=False), help='LLM provider to use')
-@click.option('--llm-api-key', help='API key for LLM provider (overrides stored config)')
+@click.option('--llm-provider', type=click.Choice(['gemini', 'openai', 'anthropic', 'mistral', 'groq', 'openrouter', 'xai', 'ollama'], case_sensitive=False), help='LLM provider to use')
+@click.option('--llm-api-key', help='API key for LLM provider (or base URL for Ollama)')
 @click.option('--llm-model', help='Specific model to use (overrides default)')
 @click.option('--gemini-key', help='[DEPRECATED] Use --llm-api-key with --llm-provider gemini')
 def analyze(repo_url, no_ai, max_files, json_output, github_token, llm_provider, llm_api_key, llm_model, gemini_key):
@@ -268,7 +268,7 @@ def setup():
     
     # Get provider choice
     provider_choice = click.prompt(
-        "Select provider (1-5)",
+        f"Select provider (1-{len(SUPPORTED_PROVIDERS)})",
         type=click.IntRange(1, len(SUPPORTED_PROVIDERS)),
         default=1
     )
@@ -297,15 +297,33 @@ def setup():
     elif selected_provider == "groq":
         console.print("   • Visit: [cyan]https://console.groq.com/keys[/cyan]")
         console.print("   • Click 'Create API Key'")
+    elif selected_provider == "openrouter":
+        console.print("   • Visit: [cyan]https://openrouter.ai/keys[/cyan]")
+        console.print("   • Click 'Create Key'")
+    elif selected_provider == "xai":
+        console.print("   • Visit: [cyan]https://console.x.ai[/cyan]")
+        console.print("   • Create an API key")
+    elif selected_provider == "ollama":
+        console.print("   • Ollama runs locally - no API key needed")
+        console.print("   • Install: [cyan]https://ollama.ai/download[/cyan]")
+        console.print("   • Run: [yellow]ollama pull llama3[/yellow]")
+        console.print("   • Leave base URL as default or enter custom")
     
     console.print("   • Copy the key\n")
     
-    llm_api_key = click.prompt(
-        f"Enter your {provider_info['name']} API key (or press Enter to skip)",
-        default="",
-        hide_input=True,
-        show_default=False
-    )
+    if selected_provider == "ollama":
+        llm_api_key = click.prompt(
+            "Enter Ollama base URL (or press Enter for default: http://localhost:11434)",
+            default="http://localhost:11434",
+            show_default=True
+        )
+    else:
+        llm_api_key = click.prompt(
+            f"Enter your {provider_info['name']} API key (or press Enter to skip)",
+            default="",
+            hide_input=True,
+            show_default=False
+        )
     
     # Optional: Custom model selection
     llm_model = None

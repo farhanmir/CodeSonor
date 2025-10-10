@@ -123,7 +123,7 @@ class TestImports:
         """Test that package has version"""
         import codesonor
         assert hasattr(codesonor, "__version__")
-        assert codesonor.__version__ == "0.4.0"
+        assert codesonor.__version__ == "0.4.1"
 
 
 class TestLLMProviders:
@@ -139,7 +139,7 @@ class TestLLMProviders:
         """Test that all expected providers are supported"""
         from codesonor.llm_providers import SUPPORTED_PROVIDERS
         
-        expected_providers = ["gemini", "openai", "anthropic", "mistral", "groq"]
+        expected_providers = ["gemini", "openai", "anthropic", "mistral", "groq", "openrouter", "xai", "ollama"]
         for provider in expected_providers:
             assert provider in SUPPORTED_PROVIDERS
             assert "name" in SUPPORTED_PROVIDERS[provider]
@@ -151,12 +151,13 @@ class TestLLMProviders:
         from codesonor.llm_providers import get_provider
         
         # Test creating providers (without API keys, they won't be available)
-        providers_to_test = ["gemini", "openai", "anthropic", "mistral", "groq"]
+        providers_to_test = ["gemini", "openai", "anthropic", "mistral", "groq", "openrouter", "xai", "ollama"]
         
         for provider_name in providers_to_test:
             provider = get_provider(provider_name, api_key=None)
             assert provider is not None
-            assert not provider.is_available()  # No API key, so not available
+            if provider_name != "ollama":  # Ollama might be available locally
+                assert not provider.is_available()  # No API key, so not available
     
     def test_invalid_provider(self):
         """Test that invalid provider raises error"""

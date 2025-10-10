@@ -5,7 +5,7 @@ Provides framework detection and best practices for popular languages.
 
 import re
 from pathlib import Path
-from typing import Dict, List, Any, Set
+from typing import Dict, List, Any, Set, Optional
 from collections import defaultdict
 
 

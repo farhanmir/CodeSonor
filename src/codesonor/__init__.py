@@ -13,11 +13,16 @@ New in v0.4.0:
 - Custom rules engine
 - Language-specific deep insights
 - Interactive dashboard
+
+New in v0.4.1:
+- Added OpenRouter support (access 100+ models)
+- Added xAI Grok support
+- Added Ollama support (FREE local LLMs)
+- Cleaned up package metadata
 """
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __author__ = "Farhan Mir"
-__email__ = "your.email@example.com"
 
 from .analyzer import RepositoryAnalyzer
 from .github_client import GitHubClient

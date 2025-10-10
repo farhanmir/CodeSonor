@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codesonor"
-version = "0.4.0"
-description = "AI-Powered GitHub Repository Analyzer with multi-LLM support, caching, quality scoring, export formats, watch mode, and interactive dashboard"
+version = "0.4.1"
+description = "AI-Powered GitHub Repository Analyzer - 8 LLM providers (Gemini, OpenAI, Claude, Mistral, Groq, OpenRouter, xAI, Ollama), caching, quality scoring, exports, watch mode, dashboard"
 readme = "CLI_README.md"
-authors = [{name = "Farhan Mir", email = "your.email@example.com"}]
+authors = [{name = "Farhan Mir"}]
 license = {text = "MIT"}
 classifiers = [
     "Development Status :: 4 - Beta",

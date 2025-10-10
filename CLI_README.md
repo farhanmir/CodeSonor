@@ -5,7 +5,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Analyze any GitHub repository with AI-powered insights. Choose from 5 different AI providers!
+Analyze any GitHub repository with AI-powered insights. Choose from 8 different AI providers!
 
 ## 🚀 Installation
 
@@ -32,8 +32,11 @@ pip install codesonor[all-llm]     # All providers
 | **Claude** | ❌ Paid | Fast | [Get Key](https://console.anthropic.com/settings/keys) |
 | **Mistral** | ❌ Paid | Fast | [Get Key](https://console.mistral.ai/api-keys/) |
 | **Groq** ⚡ | ✅ Yes | Ultra-fast | [Get Key](https://console.groq.com/keys) |
+| **OpenRouter** 🌐 | 💳 Pay-per-use | Fast | [Get Key](https://openrouter.ai/keys) |
+| **xAI Grok** | ❌ Paid | Fast | [Get Key](https://console.x.ai) |
+| **Ollama** 🆓 | ✅ FREE | Medium | [Download](https://ollama.ai/download) |
 
-⭐ Default | ⚡ Fastest
+⭐ Default | ⚡ Fastest | 🌐 100+ models | 🆓 Local & FREE
 
 ## ⚙️ Configuration
 

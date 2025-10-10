@@ -1,6 +1,6 @@
 # CodeSonor 🔍
 
-**AI-powered GitHub repository analyzer with multi-LLM support** - Choose from 5 different AI providers!
+**AI-powered GitHub repository analyzer with multi-LLM support** - Choose from 8 different AI providers!
 
 [![PyPI version](https://img.shields.io/pypi/v/codesonor.svg)](https://pypi.org/project/codesonor/)
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
@@ -37,8 +37,11 @@ codesonor analyze https://github.com/pallets/flask
 | **Claude** | ❌ Paid | Fast | Excellent | Long code |
 | **Mistral** | ❌ Paid | Fast | Good | Europe |
 | **Groq** ⚡ | ✅ Yes | Ultra-fast | Good | Speed |
+| **OpenRouter** 🌐 | 💳 Pay-per-use | Fast | Excellent | 100+ models |
+| **xAI Grok** | ❌ Paid | Fast | Excellent | Latest tech |
+| **Ollama** 🆓 | ✅ FREE | Medium | Good | Privacy/Local |
 
-⭐ Default provider | ⚡ Fastest inference
+⭐ Default provider | ⚡ Fastest inference | 🌐 Access to 100+ models | 🆓 Runs locally, no API key needed
 
 ## 📦 Installation
 
@@ -53,6 +56,7 @@ pip install codesonor[openai]      # For OpenAI GPT
 pip install codesonor[anthropic]   # For Claude
 pip install codesonor[mistral]     # For Mistral
 pip install codesonor[groq]        # For Groq
+# Note: OpenRouter, xAI, and Ollama use OpenAI-compatible APIs (included by default)
 pip install codesonor[all-llm]     # All providers
 ```
 
@@ -86,12 +90,15 @@ Edit `~/.codesonor/config.json`:
 # GitHub token (optional but recommended)
 export GITHUB_TOKEN="ghp_your_token"
 
-# LLM provider API keys
+# LLM provider API keys (choose one or more)
 export GEMINI_API_KEY="your_key"
 export OPENAI_API_KEY="sk-your_key"
 export ANTHROPIC_API_KEY="sk-ant-your_key"
 export MISTRAL_API_KEY="your_key"
 export GROQ_API_KEY="gsk_your_key"
+export OPENROUTER_API_KEY="sk-or-your_key"
+export XAI_API_KEY="xai-your_key"
+# Ollama runs locally, no API key needed!
 ```
 
 ## 📖 Usage
@@ -179,7 +186,10 @@ serves as the central object for WSGI applications...
 - **OpenAI**: https://platform.openai.com/api-keys
 - **Anthropic Claude**: https://console.anthropic.com/settings/keys
 - **Mistral AI**: https://console.mistral.ai/api-keys/
-- **Groq**: https://console.groq.com/keys
+- **Groq** (Free): https://console.groq.com/keys
+- **OpenRouter**: https://openrouter.ai/keys
+- **xAI Grok**: https://console.x.ai
+- **Ollama**: https://ollama.ai/download (FREE, runs locally!)
 - **GitHub Token**: https://github.com/settings/tokens (optional, prevents rate limits)
 
 ## 🛠️ Tech Stack
@@ -214,13 +224,15 @@ If you find CodeSonor useful, please consider giving it a star! ⭐
 - **Issues**: [GitHub Issues](https://github.com/farhanmir/CodeSonor/issues)
 - **PyPI**: [PyPI Project](https://pypi.org/project/codesonor/)
 
-## 🚀 What's New in v0.3.0
+## 🚀 What's New in v0.4.1
 
-- 🎉 **Multi-LLM Provider Support** - Choose from 5 AI providers
-- 🔧 **Enhanced Setup Wizard** - Interactive provider selection
-- 📊 **Flexible Configuration** - Multiple ways to configure API keys
-- ⚡ **Performance** - Optional provider-specific packages
-- 📖 **Better Documentation** - Comprehensive guides for each provider
+- � **OpenRouter Support** - Access to 100+ AI models with a single API key
+- 🤖 **xAI Grok** - Latest AI from xAI
+- 🆓 **Ollama Integration** - Run AI models locally for FREE (no API key needed!)
+- 🧹 **Code Quality** - Enhanced metadata and package information
+- � **8 LLM Providers** - More choice than ever before!
+
+See [V0.4.1_UPDATE.md](V0.4.1_UPDATE.md) for complete details.
 
 ---
 
