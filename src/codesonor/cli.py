@@ -36,34 +36,58 @@ def cli():
 @click.option('--max-files', default=500, help='Maximum files to analyze (default: 500)')
 @click.option('--json-output', is_flag=True, help='Output results as JSON')
 @click.option('--github-token', help='GitHub Personal Access Token (overrides stored config)')
-@click.option('--gemini-key', help='Gemini API key for AI analysis (overrides stored config)')
-def analyze(repo_url, no_ai, max_files, json_output, github_token, gemini_key):
+@click.option('--llm-provider', type=click.Choice(['gemini', 'openai', 'anthropic', 'mistral', 'groq'], case_sensitive=False), help='LLM provider to use')
+@click.option('--llm-api-key', help='API key for LLM provider (overrides stored config)')
+@click.option('--llm-model', help='Specific model to use (overrides default)')
+@click.option('--gemini-key', help='[DEPRECATED] Use --llm-api-key with --llm-provider gemini')
+def analyze(repo_url, no_ai, max_files, json_output, github_token, llm_provider, llm_api_key, llm_model, gemini_key):
     """
     Analyze a GitHub repository.
     
     REPO_URL: The URL of the GitHub repository to analyze
     
     Example: codesonor analyze https://github.com/pallets/flask
+    
+    With specific LLM provider:
+      codesonor analyze URL --llm-provider openai --llm-api-key YOUR_KEY
     """
     try:
-        # Get API keys (priority: CLI option > config file > environment)
+        # Get GitHub token
         if not github_token:
             github_token = config_manager.get_github_token()
         
-        if not gemini_key:
-            gemini_key = config_manager.get_gemini_key()
+        # Get LLM configuration
+        if not llm_provider:
+            llm_provider = config_manager.get_llm_provider()
+        
+        if not llm_api_key:
+            # Handle legacy gemini-key parameter
+            if gemini_key:
+                llm_api_key = gemini_key
+                llm_provider = 'gemini'
+                console.print("[yellow]⚠ --gemini-key is deprecated. Use --llm-api-key with --llm-provider gemini[/yellow]\n")
+            else:
+                llm_api_key = config_manager.get_llm_api_key()
+        
+        if not llm_model:
+            llm_model = config_manager.get_llm_model()
         
         # Check for required keys
         if not github_token:
             console.print("[yellow]⚠ GitHub token not configured. You may hit rate limits.[/yellow]")
             console.print("[yellow]Run 'codesonor setup' to configure your API keys.[/yellow]\n")
         
-        if not no_ai and not gemini_key:
-            console.print("[yellow]⚠ Gemini API key not configured. AI analysis will be skipped.[/yellow]")
+        if not no_ai and not llm_api_key:
+            console.print(f"[yellow]⚠ LLM API key not configured. AI analysis will be skipped.[/yellow]")
             console.print("[yellow]Run 'codesonor setup' to configure your API keys.[/yellow]\n")
         
-        # Create analyzer
-        analyzer = RepositoryAnalyzer(github_token, gemini_key)
+        # Create analyzer with LLM provider support
+        analyzer = RepositoryAnalyzer(
+            github_token, 
+            llm_api_key,
+            llm_provider=llm_provider,
+            llm_model=llm_model
+        )
         
         # Analyze with progress indicator
         with Progress(
@@ -179,8 +203,10 @@ def setup():
     """
     Interactive setup wizard for API keys.
     
-    Configure your GitHub and Gemini API keys once - they'll be saved for future use.
+    Configure your GitHub token and choose your preferred LLM provider.
     """
+    from .llm_providers import SUPPORTED_PROVIDERS
+    
     console.print("[bold cyan]🔧 CodeSonor Setup Wizard[/bold cyan]\n")
     
     # Check current status
@@ -195,19 +221,22 @@ def setup():
     else:
         console.print("  GitHub Token: ❌ Not configured")
     
-    # Gemini Key status
-    if status['gemini_key']['set']:
-        source = status['gemini_key']['source']
-        console.print(f"  Gemini API Key: ✅ Configured (from {source})")
+    # LLM status
+    if status['llm_api_key']['set']:
+        source = status['llm_api_key']['source']
+        provider = status['llm_provider']
+        model = status['llm_model']
+        model_str = f" ({model})" if model else ""
+        console.print(f"  LLM Provider: ✅ {provider.capitalize()}{model_str} (from {source})")
     else:
-        console.print("  Gemini API Key: ❌ Not configured")
+        console.print("  LLM Provider: ❌ Not configured")
     
     console.print(f"\n[dim]Config file: {status['config_file']}[/dim]\n")
     
     # Ask if user wants to configure
-    if status['github_token']['set'] and status['gemini_key']['set']:
+    if status['github_token']['set'] and status['llm_api_key']['set']:
         console.print("[green]✓ All API keys are configured![/green]\n")
-        reconfigure = click.confirm("Do you want to update your keys?", default=False)
+        reconfigure = click.confirm("Do you want to update your configuration?", default=False)
         if not reconfigure:
             return
     
@@ -228,25 +257,80 @@ def setup():
         show_default=False
     )
     
-    # Gemini API Key setup
-    console.print("\n[bold]2. Google Gemini API Key[/bold] (Required for AI analysis)")
-    console.print("   [dim]This enables AI-powered code summaries[/dim]")
-    console.print("   • Visit: [cyan]https://aistudio.google.com/app/apikey[/cyan]")
-    console.print("   • Click 'Create API key'")
+    # LLM Provider selection
+    console.print("\n[bold]2. Choose Your LLM Provider[/bold] (Required for AI analysis)")
+    console.print("   [dim]Select which AI service you want to use:[/dim]\n")
+    
+    for idx, (key, info) in enumerate(SUPPORTED_PROVIDERS.items(), 1):
+        console.print(f"   {idx}. [cyan]{info['name']}[/cyan] - Default model: {info['default']}")
+    
+    console.print()
+    
+    # Get provider choice
+    provider_choice = click.prompt(
+        "Select provider (1-5)",
+        type=click.IntRange(1, len(SUPPORTED_PROVIDERS)),
+        default=1
+    )
+    
+    provider_keys = list(SUPPORTED_PROVIDERS.keys())
+    selected_provider = provider_keys[provider_choice - 1]
+    provider_info = SUPPORTED_PROVIDERS[selected_provider]
+    
+    console.print(f"\n[bold]Selected: {provider_info['name']}[/bold]")
+    
+    # API Key instructions per provider
+    console.print(f"\n[bold]Get your {provider_info['name']} API Key:[/bold]")
+    
+    if selected_provider == "gemini":
+        console.print("   • Visit: [cyan]https://aistudio.google.com/app/apikey[/cyan]")
+        console.print("   • Click 'Create API key'")
+    elif selected_provider == "openai":
+        console.print("   • Visit: [cyan]https://platform.openai.com/api-keys[/cyan]")
+        console.print("   • Click 'Create new secret key'")
+    elif selected_provider == "anthropic":
+        console.print("   • Visit: [cyan]https://console.anthropic.com/settings/keys[/cyan]")
+        console.print("   • Click 'Create Key'")
+    elif selected_provider == "mistral":
+        console.print("   • Visit: [cyan]https://console.mistral.ai/api-keys/[/cyan]")
+        console.print("   • Click 'Create new key'")
+    elif selected_provider == "groq":
+        console.print("   • Visit: [cyan]https://console.groq.com/keys[/cyan]")
+        console.print("   • Click 'Create API Key'")
+    
     console.print("   • Copy the key\n")
     
-    gemini_key = click.prompt(
-        "Enter your Gemini API key (or press Enter to skip)",
+    llm_api_key = click.prompt(
+        f"Enter your {provider_info['name']} API key (or press Enter to skip)",
         default="",
         hide_input=True,
         show_default=False
     )
     
+    # Optional: Custom model selection
+    llm_model = None
+    if llm_api_key and len(provider_info['models']) > 1:
+        console.print(f"\n[bold]Available models for {provider_info['name']}:[/bold]")
+        for idx, model in enumerate(provider_info['models'], 1):
+            default_mark = " (default)" if model == provider_info['default'] else ""
+            console.print(f"   {idx}. {model}{default_mark}")
+        
+        use_custom = click.confirm(f"\nUse a different model? (default: {provider_info['default']})", default=False)
+        if use_custom:
+            model_choice = click.prompt(
+                "Select model",
+                type=click.IntRange(1, len(provider_info['models'])),
+                default=1
+            )
+            llm_model = provider_info['models'][model_choice - 1]
+    
     # Save configuration
-    if github_token or gemini_key:
+    if github_token or llm_api_key:
         config_manager.save_config(
             github_token=github_token if github_token else None,
-            gemini_key=gemini_key if gemini_key else None
+            llm_provider=selected_provider if llm_api_key else None,
+            llm_api_key=llm_api_key if llm_api_key else None,
+            llm_model=llm_model
         )
         
         console.print("\n[bold green]✓ Configuration saved successfully![/bold green]")
@@ -254,11 +338,15 @@ def setup():
         
         if github_token:
             console.print("  ✓ GitHub token configured")
-        if gemini_key:
-            console.print("  ✓ Gemini API key configured")
+        if llm_api_key:
+            model_str = f" with model {llm_model}" if llm_model else ""
+            console.print(f"  ✓ {provider_info['name']} configured{model_str}")
         
         console.print("\n[bold cyan]You're all set![/bold cyan]")
         console.print("Try it out: [yellow]codesonor analyze https://github.com/pallets/flask[/yellow]\n")
+        
+        # Show installation note for provider package
+        console.print(f"[dim]Note: Make sure you have installed: pip install {provider_info['requires']}[/dim]\n")
     else:
         console.print("\n[yellow]No keys entered. Run 'codesonor setup' again when ready.[/yellow]\n")
 
@@ -273,24 +361,31 @@ def config():
     console.print("[bold cyan]📋 CodeSonor Configuration[/bold cyan]\n")
     
     table = Table(show_header=True, header_style="bold magenta")
-    table.add_column("API Key", style="cyan")
+    table.add_column("Setting", style="cyan")
     table.add_column("Status", style="green")
-    table.add_column("Source", style="yellow")
+    table.add_column("Source/Value", style="yellow")
     
     # GitHub Token
     github_status = "✅ Configured" if status['github_token']['set'] else "❌ Not set"
     github_source = status['github_token']['source'] or "-"
     table.add_row("GitHub Token", github_status, github_source)
     
-    # Gemini Key
-    gemini_status = "✅ Configured" if status['gemini_key']['set'] else "❌ Not set"
-    gemini_source = status['gemini_key']['source'] or "-"
-    table.add_row("Gemini API Key", gemini_status, gemini_source)
+    # LLM Provider
+    llm_status = "✅ Configured" if status['llm_api_key']['set'] else "❌ Not set"
+    llm_source = status['llm_api_key']['source'] or "-"
+    table.add_row("LLM Provider", status['llm_provider'].capitalize(), llm_source)
+    
+    # LLM Model
+    model_value = status['llm_model'] or "(default)"
+    table.add_row("LLM Model", "", model_value)
+    
+    # LLM API Key
+    table.add_row("LLM API Key", llm_status, llm_source)
     
     console.print(table)
     console.print(f"\n[dim]Config file: {status['config_file']}[/dim]")
     
-    if not status['github_token']['set'] or not status['gemini_key']['set']:
+    if not status['github_token']['set'] or not status['llm_api_key']['set']:
         console.print("\n[yellow]💡 Run 'codesonor setup' to configure missing keys[/yellow]\n")
 
 

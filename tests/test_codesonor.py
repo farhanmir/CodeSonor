@@ -123,4 +123,70 @@ class TestImports:
         """Test that package has version"""
         import codesonor
         assert hasattr(codesonor, "__version__")
-        assert codesonor.__version__ == "0.2.0"
+        assert codesonor.__version__ == "0.3.0"
+
+
+class TestLLMProviders:
+    """Tests for multi-LLM provider support"""
+    
+    def test_import_providers(self):
+        """Test importing LLM providers module"""
+        from codesonor.llm_providers import get_provider, SUPPORTED_PROVIDERS
+        assert get_provider is not None
+        assert SUPPORTED_PROVIDERS is not None
+    
+    def test_supported_providers(self):
+        """Test that all expected providers are supported"""
+        from codesonor.llm_providers import SUPPORTED_PROVIDERS
+        
+        expected_providers = ["gemini", "openai", "anthropic", "mistral", "groq"]
+        for provider in expected_providers:
+            assert provider in SUPPORTED_PROVIDERS
+            assert "name" in SUPPORTED_PROVIDERS[provider]
+            assert "models" in SUPPORTED_PROVIDERS[provider]
+            assert "default" in SUPPORTED_PROVIDERS[provider]
+    
+    def test_get_provider_factory(self):
+        """Test provider factory function"""
+        from codesonor.llm_providers import get_provider
+        
+        # Test creating providers (without API keys, they won't be available)
+        providers_to_test = ["gemini", "openai", "anthropic", "mistral", "groq"]
+        
+        for provider_name in providers_to_test:
+            provider = get_provider(provider_name, api_key=None)
+            assert provider is not None
+            assert not provider.is_available()  # No API key, so not available
+    
+    def test_invalid_provider(self):
+        """Test that invalid provider raises error"""
+        from codesonor.llm_providers import get_provider
+        
+        with pytest.raises(ValueError) as exc_info:
+            get_provider("invalid_provider")
+        
+        assert "Unsupported provider" in str(exc_info.value)
+    
+    def test_ai_analyzer_with_providers(self):
+        """Test AIAnalyzer accepts different providers"""
+        from codesonor.ai_analyzer import AIAnalyzer
+        
+        # Test with different providers (no API keys)
+        for provider in ["gemini", "openai", "anthropic"]:
+            analyzer = AIAnalyzer(api_key=None, provider=provider)
+            assert analyzer.provider_name == provider
+            assert not analyzer.is_available()
+    
+    def test_repository_analyzer_llm_params(self):
+        """Test RepositoryAnalyzer accepts LLM parameters"""
+        from codesonor.analyzer import RepositoryAnalyzer
+        
+        # Test with LLM provider parameters
+        analyzer = RepositoryAnalyzer(
+            github_token=None,
+            gemini_key=None,
+            llm_provider="openai",
+            llm_model="gpt-4"
+        )
+        assert analyzer is not None
+        assert analyzer.ai is not None

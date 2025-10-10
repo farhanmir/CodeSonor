@@ -1,31 +1,49 @@
-"""AI-powered code analyzer using Gemini API."""
+"""AI-powered code analyzer with multi-provider support."""
 
 import os
 from typing import Optional, List, Dict
-import google.generativeai as genai
+from .llm_providers import get_provider, LLMProvider, SUPPORTED_PROVIDERS
 
 
 class AIAnalyzer:
-    """AI-powered code analyzer using Google's Gemini API."""
+    """AI-powered code analyzer supporting multiple LLM providers."""
     
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(
+        self, 
+        api_key: Optional[str] = None,
+        provider: str = "gemini",
+        model: Optional[str] = None
+    ):
         """
         Initialize AI analyzer.
         
         Args:
-            api_key: Gemini API key (optional, will use GEMINI_API_KEY env var)
+            api_key: API key for the LLM provider
+            provider: LLM provider name (gemini, openai, anthropic, mistral, groq)
+            model: Optional model name override
         """
-        self.api_key = api_key or os.getenv('GEMINI_API_KEY')
+        self.provider_name = provider.lower()
+        self.api_key = api_key
+        self.model_name = model
+        self.provider: Optional[LLMProvider] = None
         
+        # Try to initialize the provider
         if self.api_key:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-1.5-flash')
-        else:
-            self.model = None
+            try:
+                self.provider = get_provider(self.provider_name, self.api_key, self.model_name)
+            except Exception as e:
+                print(f"Warning: Failed to initialize {self.provider_name}: {e}")
+                self.provider = None
     
     def is_available(self) -> bool:
         """Check if AI analysis is available."""
-        return self.model is not None
+        return self.provider is not None and self.provider.is_available()
+    
+    def get_provider_name(self) -> str:
+        """Get the name of the current provider."""
+        if self.provider:
+            return self.provider.get_name()
+        return "No provider configured"
     
     def generate_summary(self, code: str, filename: str) -> str:
         """
@@ -39,7 +57,7 @@ class AIAnalyzer:
             AI-generated summary or error message
         """
         if not self.is_available():
-            return "AI summary not available. Please configure GEMINI_API_KEY."
+            return f"AI summary not available. Please configure API key for {self.provider_name}."
         
         try:
             prompt = f"""Analyze this code file named '{filename}' and provide:
@@ -54,8 +72,8 @@ Code:
 
 Provide a concise, professional summary."""
 
-            response = self.model.generate_content(prompt)
-            return response.text
+            response = self.provider.generate(prompt)
+            return response
             
         except Exception as e:
             return f"Error generating summary: {str(e)}"

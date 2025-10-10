@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codesonor"
-version = "0.2.0"
-description = "AI-Powered GitHub Repository Analyzer - Analyze any GitHub repository with AI-generated insights"
+version = "0.3.0"
+description = "AI-Powered GitHub Repository Analyzer with multi-LLM support - Analyze repositories using Gemini, OpenAI, Claude, Mistral, or Groq"
 readme = "CLI_README.md"
 authors = [{name = "Farhan Mir", email = "your.email@example.com"}]
 license = {text = "MIT"}
@@ -32,12 +32,31 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# LLM Provider packages (install as needed)
+gemini = ["google-generativeai>=0.3.0"]
+openai = ["openai>=1.0.0"]
+anthropic = ["anthropic>=0.18.0"]
+mistral = ["mistralai>=0.1.0"]
+groq = ["groq>=0.4.0"]
+
+# Install all LLM providers
+all-llm = [
+    "google-generativeai>=0.3.0",
+    "openai>=1.0.0",
+    "anthropic>=0.18.0",
+    "mistralai>=0.1.0",
+    "groq>=0.4.0",
+]
+
+# Development tools
 dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
     "flake8>=6.0.0",
     "mypy>=1.0.0",
 ]
+
+# Web application dependencies
 web = [
     "Flask>=3.0.0",
     "Flask-CORS>=4.0.0",

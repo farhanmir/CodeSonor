@@ -1,28 +1,39 @@
-# CodeSonor 🔍
+# CodeSonor CLI 🔍
 
-**AI-Powered GitHub Repository Analyzer** - Analyze any GitHub repository with AI-generated insights, language statistics, and comprehensive code summaries.
+**AI-Powered GitHub Repository Analyzer with Multi-LLM Support**
 
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+Analyze any GitHub repository with AI-powered insights. Choose from 5 different AI providers!
+
 ## 🚀 Installation
 
+### Basic (includes Gemini)
 ```bash
 pip install codesonor
 ```
 
-## 📋 Prerequisites
+### With Specific Provider
+```bash
+pip install codesonor[openai]      # OpenAI GPT
+pip install codesonor[anthropic]   # Anthropic Claude
+pip install codesonor[mistral]     # Mistral AI
+pip install codesonor[groq]        # Groq (fastest)
+pip install codesonor[all-llm]     # All providers
+```
 
-### API Keys
+## 🤖 Supported AI Providers
 
-1. **Google Gemini API Key** (Required for AI analysis)
-   - Get it FREE at [Google AI Studio](https://aistudio.google.com/app/apikey)
-   - Click "Create API key"
-   
-2. **GitHub Personal Access Token** (Optional, but recommended to avoid rate limits)
-   - Create at [GitHub Settings → Tokens](https://github.com/settings/tokens)
-   - Click "Generate new token (classic)"
-   - Select scope: `public_repo`
+| Provider | Free Tier | Speed | Get API Key |
+|----------|-----------|-------|-------------|
+| **Gemini** ⭐ | ✅ Yes | Fast | [Get Key](https://aistudio.google.com/app/apikey) |
+| **OpenAI** | ❌ Paid | Medium | [Get Key](https://platform.openai.com/api-keys) |
+| **Claude** | ❌ Paid | Fast | [Get Key](https://console.anthropic.com/settings/keys) |
+| **Mistral** | ❌ Paid | Fast | [Get Key](https://console.mistral.ai/api-keys/) |
+| **Groq** ⚡ | ✅ Yes | Ultra-fast | [Get Key](https://console.groq.com/keys) |
+
+⭐ Default | ⚡ Fastest
 
 ## ⚙️ Configuration
 
@@ -31,9 +42,10 @@ pip install codesonor
 codesonor setup
 ```
 This interactive wizard will:
-- ✅ Save your API keys securely in `~/.codesonor/config.json`
-- ✅ Work across all your projects
-- ✅ Never ask for keys again!
+- ✅ Let you choose your AI provider
+- ✅ Guide you to get the API key  
+- ✅ Save everything to `~/.codesonor/config.json`
+- ✅ Never ask again!
 
 ### Check Your Configuration
 ```bash

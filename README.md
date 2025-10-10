@@ -1,334 +1,227 @@
 # CodeSonor 🔍
 
-**AI-powered GitHub repository analyzer** - Available as both a CLI tool and web application.
+**AI-powered GitHub repository analyzer with multi-LLM support** - Choose from 5 different AI providers!
 
 [![PyPI version](https://img.shields.io/pypi/v/codesonor.svg)](https://pypi.org/project/codesonor/)
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://img.shields.io/pypi/dm/codesonor.svg)](https://pypi.org/project/codesonor/)
 
+Analyze any GitHub repository with AI-powered insights. Get language statistics, code summaries, and repository metrics in seconds.
+
 ## 🚀 Quick Start
 
-### CLI Tool (Recommended)
 ```bash
 pip install codesonor
+codesonor setup  # Interactive configuration wizard
 codesonor analyze https://github.com/pallets/flask
 ```
 
-### Web Application
+## ✨ Features
+
+- 🤖 **Multi-LLM Support** - Choose from Gemini, OpenAI, Claude, Mistral, or Groq
+- 🔧 **Interactive Setup** - One-time configuration wizard saves your preferences
+- 📊 **Language Analysis** - Distribution breakdown across 20+ programming languages
+- 🧠 **AI Code Summaries** - AI-generated insights for key files
+- 📈 **Repository Stats** - Stars, forks, contributors, file counts
+- ⚡ **Fast Analysis** - Smart filtering and caching
+- 🎨 **Beautiful Output** - Rich terminal formatting with tables and colors
+- 💾 **Export Options** - JSON output for integration
+
+## 🤖 Supported AI Providers
+
+| Provider | Free Tier | Speed | Quality | Best For |
+|----------|-----------|-------|---------|----------|
+| **Gemini** ⭐ | ✅ Yes | Fast | Good | Beginners |
+| **OpenAI** | ❌ Paid | Medium | Excellent | Production |
+| **Claude** | ❌ Paid | Fast | Excellent | Long code |
+| **Mistral** | ❌ Paid | Fast | Good | Europe |
+| **Groq** ⚡ | ✅ Yes | Ultra-fast | Good | Speed |
+
+⭐ Default provider | ⚡ Fastest inference
+
+## 📦 Installation
+
+### Basic Installation (includes Gemini)
 ```bash
-git clone https://github.com/farhanmir/CodeSonor.git
-cd CodeSonor
-pip install -r requirements.txt
-python app.py  # Visit http://localhost:5000
-```
-
-## Features ✨
-
-- 💾 **Easy Installation** - `pip install codesonor`
-- 🖥️ **Dual Interface** - CLI tool or web application
-- 📊 **Language Analysis** - Distribution breakdown across 20+ languages
-- 🤖 **AI Summaries** - Powered by Google Gemini
-- 📈 **Repository Stats** - Stars, forks, file counts, and more
-- ⚡ **Fast Analysis** - Smart filtering for quick results
-- 🎨 **Beautiful Output** - Rich terminal formatting or Bootstrap UI
-
-## Features ✨
-
-- �️ **Dual Interface** - Use as CLI tool or web application
-- 💾 **Easy Installation** - `pip install codesonor` (after publishing)
-- �📊 **Language Distribution Analysis** - Visual breakdown of programming languages used
-- 🤖 **AI-Powered Code Summaries** - Automatic insights using Google's Gemini API
-- 📈 **Repository Statistics** - File counts, stars, forks, and timeline information
-- 🎨 **Beautiful Output** - Rich terminal formatting (CLI) or Bootstrap UI (Web)
-- ⚡ **Fast Analysis** - Smart filtering and file limits for quick results
-- 🔒 **Public Repos** - Analyze any public GitHub repository
-
-## Tech Stack 🛠️
-
-### Backend
-- **Python 3.8+**
-- **Flask** - Web framework
-- **Flask-CORS** - Cross-origin resource sharing
-- **Requests** - HTTP library for GitHub API
-- **Google Generative AI** - Gemini API for code analysis
-- **python-dotenv** - Environment variable management
-
-### Frontend
-- **HTML5 & CSS3**
-- **Bootstrap 5** - Responsive UI framework
-- **JavaScript (ES6+)** - Client-side logic
-- **Bootstrap Icons** - Icon library
-
-## Installation & Setup 🚀
-
-### CLI Installation
-
-```bash
-# Install from PyPI
 pip install codesonor
-
-# Set API keys
-export GEMINI_API_KEY="your_gemini_api_key"
-export GITHUB_TOKEN="your_github_token"
-
-# Use it
-codesonor analyze https://github.com/pallets/flask
 ```
 
-Get API keys:
-- **Gemini**: https://makersuite.google.com/app/apikey (Free)
-- **GitHub**: https://github.com/settings/tokens (needs `public_repo` scope)
-
-📖 **Full CLI docs**: See [CLI_README.md](CLI_README.md)
-
----
-
-### Web App Setup
-
-### Prerequisites
-- Python 3.8 or higher
-- pip (Python package manager)
-- A Google Gemini API key ([Get one here](https://makersuite.google.com/app/apikey))
-- A GitHub Personal Access Token ([Get one here](https://github.com/settings/tokens)) - **Required for API access**
-
-### Step 1: Clone or Download the Repository
+### With Specific Provider
 ```bash
-cd CodeSonor
+pip install codesonor[openai]      # For OpenAI GPT
+pip install codesonor[anthropic]   # For Claude
+pip install codesonor[mistral]     # For Mistral
+pip install codesonor[groq]        # For Groq
+pip install codesonor[all-llm]     # All providers
 ```
 
-### Step 2: Create a Virtual Environment (Recommended)
+## 🔧 Configuration
+
+### Interactive Setup (Recommended)
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
+codesonor setup
 ```
 
-### Step 3: Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+This wizard will:
+1. Let you choose your preferred AI provider
+2. Guide you to get the API key
+3. Optionally select a specific model
+4. Save everything to `~/.codesonor/config.json`
 
-### Step 4: Configure Environment Variables
-1. Copy the example environment file:
-   ```bash
-   # Windows PowerShell
-   Copy-Item .env.example .env
+### Manual Configuration
 
-   # macOS/Linux
-   cp .env.example .env
-   ```
-
-2. Edit the `.env` file and add your API keys:
-   ```env
-   GEMINI_API_KEY=your_actual_gemini_api_key_here
-   GITHUB_TOKEN=your_actual_github_token_here
-   ```
-
-   **Getting API Keys:**
-   - **Gemini API Key**: Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - **GitHub Token**: Visit [GitHub Settings → Developer settings → Personal access tokens](https://github.com/settings/tokens)
-     - Create a token with `public_repo` scope
-
-### Step 5: Run the Application
-```bash
-python app.py
-```
-
-The server will start at `http://localhost:5000`
-
-### Step 6: Open in Browser
-Navigate to `http://localhost:5000` in your web browser.
-
-## Usage 📖
-
-### CLI Commands
-
-```bash
-# Quick summary (no API keys needed)
-codesonor summary https://github.com/owner/repo
-
-# Full analysis with AI
-codesonor analyze https://github.com/owner/repo
-
-# Advanced options
-codesonor analyze <url> --no-ai              # Skip AI (faster)
-codesonor analyze <url> --max-files 200      # Limit files
-codesonor analyze <url> --json-output out.json  # Export JSON
-```
-
-### Web Interface
-
-1. **Enter Repository URL**: Paste any public GitHub repository URL into the input field
-   - Example: `https://github.com/facebook/react`
-   - Example: `https://github.com/microsoft/vscode`
-
-2. **Click Analyze**: The application will:
-   - Fetch repository information from GitHub API
-   - Calculate language distribution
-   - Analyze key source files with AI
-   - Display comprehensive results
-
-3. **View Results**: The report includes:
-   - Repository metadata (name, description, stars, forks)
-   - Total file count and creation/update dates
-   - Language distribution with visual progress bars
-   - AI-generated summaries of key code files
-   - File structure overview
-
-## Project Structure 📁
-
-```
-CodeSonor/
-├── src/codesonor/         # CLI Package
-│   ├── __init__.py        # Package exports
-│   ├── __main__.py        # CLI entry point
-│   ├── cli.py             # Click-based CLI
-│   ├── analyzer.py        # Main orchestrator
-│   ├── github_client.py   # GitHub API client
-│   ├── language_stats.py  # Language analysis
-│   └── ai_analyzer.py     # Gemini AI integration
-├── static/                # Web App Frontend
-│   ├── index.html         # Main HTML page
-│   ├── style.css          # Custom styles
-│   └── script.js          # JavaScript logic
-├── tests/                 # Test suite
-│   ├── __init__.py
-│   └── test_codesonor.py
-├── app.py                 # Flask backend server
-├── pyproject.toml         # Package configuration
-├── requirements.txt       # Python dependencies
-├── .env.example           # Environment variables template
-├── CLI_README.md          # CLI documentation
-├── PUBLISHING.md          # PyPI publishing guide
-└── README.md              # This file
-```
-
-## API Endpoints 🔌
-
-### `POST /analyze`
-Analyzes a GitHub repository.
-
-**Request Body:**
+Edit `~/.codesonor/config.json`:
 ```json
 {
-  "url": "https://github.com/owner/repo"
+  "github_token": "ghp_your_token_here",
+  "llm_provider": "openai",
+  "llm_api_key": "sk-your-key",
+  "llm_model": "gpt-4"
 }
 ```
 
-**Response:**
-```json
-{
-  "repository": {
-    "name": "repo-name",
-    "owner": "owner-name",
-    "description": "Repository description",
-    "stars": 1234,
-    "forks": 567,
-    "url": "https://github.com/owner/repo",
-    "created_at": "2020-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
-  },
-  "statistics": {
-    "total_files": 150,
-    "language_distribution": {
-      "Python": 60.5,
-      "JavaScript": 30.2,
-      "HTML": 9.3
-    }
-  },
-  "ai_analysis": [
-    {
-      "file": "src/main.py",
-      "summary": "AI-generated summary..."
-    }
-  ],
-  "file_list": ["file1.py", "file2.js", ...]
-}
-```
-
-## Configuration ⚙️
-
-### Language Extensions
-The application recognizes the following file extensions:
-- Python (.py)
-- JavaScript (.js, .jsx)
-- TypeScript (.ts, .tsx)
-- Java (.java)
-- C/C++ (.c, .cpp)
-- C# (.cs)
-- Go (.go)
-- Ruby (.rb)
-- PHP (.php)
-- Swift (.swift)
-- Kotlin (.kt)
-- Rust (.rs)
-- And more...
-
-### AI Analysis
-- Analyzes up to 3 key source files per repository
-- Prioritizes main, index, app, and server files
-- Skips files larger than 50KB to avoid token limits
-- Uses first 3000 characters of each file for analysis
-
-## Troubleshooting 🔧
-
-### CLI Issues
-
-**Command not found: `codesonor`**
+### Environment Variables
 ```bash
-# Use python module instead
-python -m codesonor --help
+# GitHub token (optional but recommended)
+export GITHUB_TOKEN="ghp_your_token"
+
+# LLM provider API keys
+export GEMINI_API_KEY="your_key"
+export OPENAI_API_KEY="sk-your_key"
+export ANTHROPIC_API_KEY="sk-ant-your_key"
+export MISTRAL_API_KEY="your_key"
+export GROQ_API_KEY="gsk_your_key"
 ```
 
-**Import errors**
+## 📖 Usage
+
+### Basic Analysis
 ```bash
-# Reinstall the package
-pip install --force-reinstall codesonor
+codesonor analyze https://github.com/torvalds/linux
 ```
 
-### Web App Issues
+### Use Specific Provider
+```bash
+# OpenAI GPT-4
+codesonor analyze URL --llm-provider openai --llm-model gpt-4
 
-**"Error fetching repository files"**
-- Ensure the repository URL is correct and public
-- Check your internet connection
-- Verify GitHub API is accessible
+# Anthropic Claude
+codesonor analyze URL --llm-provider anthropic
 
-**"AI summary not available"**
-- Make sure `GEMINI_API_KEY` is set in `.env` file
-- Verify your API key is valid and active
-- Check if you've exceeded API quota
+# Groq (fastest)
+codesonor analyze URL --llm-provider groq
+```
 
-### API Issues
+### Advanced Options
+```bash
+# Skip AI analysis (stats only, faster)
+codesonor analyze URL --no-ai
 
-**Rate Limiting**
-- GitHub API has rate limits (60 requests/hour without token)
-- Add a `GITHUB_TOKEN` to your `.env` file for higher limits (5000 requests/hour)
+# Limit files analyzed
+codesonor analyze URL --max-files 100
 
-## Documentation 📚
+# Export as JSON
+codesonor analyze URL --json-output results.json
 
-- **[CLI_README.md](CLI_README.md)** - Complete CLI documentation
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development & publishing guide
-- **[QUICKSTART.md](QUICKSTART.md)** - 5-step web app quickstart
+# Quick summary without AI
+codesonor summary https://github.com/django/django
+```
 
-## Contributing 🤝
+### Check Configuration
+```bash
+codesonor config
+```
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and publishing guide.
+Output:
+```
+📋 CodeSonor Configuration
 
-## License 📄
+┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Setting       ┃ Status        ┃ Source     ┃
+┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ GitHub Token  │ ✅ Configured │ config     │
+│ LLM Provider  │ Openai        │ config     │
+│ LLM Model     │               │ gpt-4      │
+│ LLM API Key   │ ✅ Configured │ config     │
+└───────────────┴───────────────┴────────────┘
+```
+
+## 🎯 Example Output
+
+```
+╭─────────────────────────────────────────────────╮
+│  Repository: flask by pallets                   │
+╰─────────────────────────────────────────────────╯
+
+Stars: ⭐ 70,501  Forks: 🔱 16,551
+Primary Language: Python
+Total Files: 218
+
+Language Distribution:
+┏━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Language  ┃ Percentage ┃ Bar                     ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Python    │    95.80%  │ ███████████████████████ │
+│ HTML      │     1.74%  │ █                       │
+│ YAML      │     1.15%  │ █                       │
+└───────────┴────────────┴─────────────────────────┘
+
+🤖 AI-Powered Code Analysis
+File 1: src/flask/app.py
+Flask application core implementation. Defines the Flask class which
+serves as the central object for WSGI applications...
+```
+
+## 🔑 Getting API Keys
+
+- **Google Gemini** (Free): https://aistudio.google.com/app/apikey
+- **OpenAI**: https://platform.openai.com/api-keys
+- **Anthropic Claude**: https://console.anthropic.com/settings/keys
+- **Mistral AI**: https://console.mistral.ai/api-keys/
+- **Groq**: https://console.groq.com/keys
+- **GitHub Token**: https://github.com/settings/tokens (optional, prevents rate limits)
+
+## 🛠️ Tech Stack
+
+- **Python 3.9+**
+- **Click** - CLI framework
+- **Rich** - Terminal formatting
+- **Requests** - HTTP library
+- **Multiple LLM SDKs** - OpenAI, Anthropic, Groq, Mistral, Google Generative AI
+
+## 📚 Documentation
+
+- [Multi-LLM Guide](MULTI_LLM.md) - Detailed guide on using different AI providers
+- [CLI Documentation](CLI_README.md) - Complete CLI reference
+- [Contributing](CONTRIBUTING.md) - How to contribute
+- [Quick Start](QUICKSTART.md) - Get started in 5 minutes
+
+## 🤝 Contributing
+
+Contributions are welcome! Please check out our [Contributing Guide](CONTRIBUTING.md).
+
+## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## Acknowledgments 🙏
+## 🌟 Star History
 
-- Google Gemini for AI analysis
-- GitHub API for repository data
-- Bootstrap & Rich for beautiful UIs
+If you find CodeSonor useful, please consider giving it a star! ⭐
+
+## 📧 Support
+
+- **Issues**: [GitHub Issues](https://github.com/farhanmir/CodeSonor/issues)
+- **PyPI**: [PyPI Project](https://pypi.org/project/codesonor/)
+
+## 🚀 What's New in v0.3.0
+
+- 🎉 **Multi-LLM Provider Support** - Choose from 5 AI providers
+- 🔧 **Enhanced Setup Wizard** - Interactive provider selection
+- 📊 **Flexible Configuration** - Multiple ways to configure API keys
+- ⚡ **Performance** - Optional provider-specific packages
+- 📖 **Better Documentation** - Comprehensive guides for each provider
 
 ---
 
-**Author**: Farhan Mir | [GitHub](https://github.com/farhanmir)
+Made with ❤️ by [Farhan Mir](https://github.com/farhanmir)

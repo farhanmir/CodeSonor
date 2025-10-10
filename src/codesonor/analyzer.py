@@ -11,16 +11,29 @@ from .ai_analyzer import AIAnalyzer
 class RepositoryAnalyzer:
     """Main analyzer for GitHub repositories."""
     
-    def __init__(self, github_token: Optional[str] = None, gemini_key: Optional[str] = None):
+    def __init__(
+        self, 
+        github_token: Optional[str] = None,
+        gemini_key: Optional[str] = None,  # Legacy parameter
+        llm_provider: str = "gemini",
+        llm_model: Optional[str] = None
+    ):
         """
         Initialize repository analyzer.
         
         Args:
             github_token: GitHub Personal Access Token
-            gemini_key: Gemini API key for AI analysis
+            gemini_key: (Legacy) Gemini API key - use llm_provider params instead
+            llm_provider: LLM provider name (gemini, openai, anthropic, mistral, groq)
+            llm_model: Optional model name override
         """
         self.github = GitHubClient(github_token)
-        self.ai = AIAnalyzer(gemini_key)
+        
+        # Handle legacy gemini_key parameter
+        api_key = gemini_key
+        provider = llm_provider
+        
+        self.ai = AIAnalyzer(api_key, provider, llm_model)
         self.language_analyzer = LanguageAnalyzer()
     
     def analyze(self, repo_url: str, include_ai: bool = True, max_files: int = 500) -> Dict:
