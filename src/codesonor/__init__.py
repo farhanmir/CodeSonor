@@ -1,27 +1,25 @@
 """
 CodeSonor - AI-Powered GitHub Repository Analyzer
 
-A powerful tool for analyzing GitHub repositories with AI-generated insights.
-Supports multiple LLM providers: Gemini, OpenAI, Claude, Mistral, and Groq.
+A powerful CLI tool for analyzing GitHub repositories with AI-powered insights.
+Supports 8 LLM providers and advanced code analysis features.
 
-New in v0.4.0:
-- Repository comparison
-- Intelligent caching
-- Code quality scoring
-- Export to JSON/HTML/Markdown
-- Watch mode for continuous monitoring
-- Custom rules engine
-- Language-specific deep insights
-- Interactive dashboard
-
-New in v0.4.1:
-- Added OpenRouter support (access 100+ models)
-- Added xAI Grok support
-- Added Ollama support (FREE local LLMs)
-- Cleaned up package metadata
+New in v0.5.0-beta:
+- Code Archaeology: Historical evolution analysis
+- Team DNA: Contributor behavioral patterns
+- Dependency Risk Score: Supply chain health
+- Code Climate Prediction: AI-powered forecasting
+- Cross-Repo Intelligence: Learn from similar projects
+- Onboarding Assistant: New developer guidance
+- Smart Code Smell Detection: Context-aware linting
+- License Compatibility Matrix: Deep license analysis
+- Performance Prediction: Static performance analysis
+- AI Code Review Tutor: Educational reviews
+- Code Portability Score: Migration planning
+- Team Health Insights: Collaboration analytics
 """
 
-__version__ = "0.4.1"
+__version__ = "0.5.0-beta"
 __author__ = "Farhan Mir"
 
 from .analyzer import RepositoryAnalyzer

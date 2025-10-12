@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codesonor"
-version = "0.4.1"
-description = "AI-Powered GitHub Repository Analyzer - 8 LLM providers (Gemini, OpenAI, Claude, Mistral, Groq, OpenRouter, xAI, Ollama), caching, quality scoring, exports, watch mode, dashboard"
+version = "0.5.0-beta"
+description = "AI-Powered GitHub Repository Analyzer - 8 LLM providers, Code Archaeology, Team DNA, Dependency Risk, ML Forecasting, Cross-Repo Learning, and 7 more unique features"
 readme = "CLI_README.md"
 authors = [{name = "Farhan Mir"}]
 license = {text = "MIT"}
@@ -30,6 +30,12 @@ dependencies = [
     "click>=8.1.0",
     "rich>=13.0.0",
     "pyyaml>=6.0.0",
+    "gitpython>=3.1.40",
+    "scikit-learn>=1.3.0",
+    "numpy>=1.24.0",
+    "networkx>=3.0",
+    "packaging>=23.0",
+    "license-expression>=30.0.0",
 ]
 
 [project.optional-dependencies]
