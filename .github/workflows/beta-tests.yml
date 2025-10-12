@@ -206,7 +206,7 @@ jobs:
         from codesonor.portability import PortabilityAnalyzer
         from pathlib import Path
         analyzer = PortabilityAnalyzer(Path('../test-repo'))
-        result = analyzer.analyze_dependencies()
+        result = analyzer.analyze_portability()
         print('✅ Portability Analyzer:', 'PASS' if 'portability_score' in result else 'FAIL')
         print(f'   Portability score: {result.get(\"portability_score\", 0)}')
         "
@@ -218,9 +218,9 @@ jobs:
         from codesonor.team_health import TeamHealthAnalyzer
         from pathlib import Path
         analyzer = TeamHealthAnalyzer(Path('../test-repo'))
-        result = analyzer.analyze_dependencies()
-        print('✅ Team Health:', 'PASS' if 'health_score' in result else 'FAIL')
-        print(f'   Health score: {result.get(\"health_score\", 0)}')
+        result = analyzer.analyze_team_health()
+        print('✅ Team Health:', 'PASS' if 'collaboration_score' in result else 'FAIL')
+        print(f'   Collaboration score: {result.get(\"collaboration_score\", 0)}')
         "
     
     - name: Generate test report
