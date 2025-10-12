@@ -55,11 +55,14 @@ jobs:
       matrix:
         repo: 
           - name: 'flask'
-            url: 'https://github.com/pallets/flask'
+            owner: 'pallets'
+            repo: 'flask'
           - name: 'requests'
-            url: 'https://github.com/psf/requests'
+            owner: 'psf'
+            repo: 'requests'
           - name: 'pytest'
-            url: 'https://github.com/pytest-dev/pytest'
+            owner: 'pytest-dev'
+            repo: 'pytest'
     
     steps:
     - name: Checkout CodeSonor
@@ -71,7 +74,7 @@ jobs:
     - name: Checkout test repository
       uses: actions/checkout@v4
       with:
-        repository: ${{ matrix.repo.url }}
+        repository: ${{ matrix.repo.owner }}/${{ matrix.repo.repo }}
         path: test-repo
         fetch-depth: 0  # Need full history for archaeology
     
@@ -93,7 +96,7 @@ jobs:
         from codesonor.archaeology import CodeArchaeology
         from pathlib import Path
         archaeology = CodeArchaeology(Path('../test-repo'))
-        result = archaeology.analyze()
+        result = archaeology.analyze_evolution()
         print('✅ Code Archaeology:', 'PASS' if 'summary' in result else 'FAIL')
         print(f'   Commits analyzed: {result.get(\"summary\", {}).get(\"total_commits\", 0)}')
         "
@@ -105,7 +108,7 @@ jobs:
         from codesonor.team_dna import TeamDNA
         from pathlib import Path
         team_dna = TeamDNA(Path('../test-repo'))
-        result = team_dna.analyze()
+        result = team_dna.analyze_contributors()
         print('✅ Team DNA:', 'PASS' if 'contributors' in result else 'FAIL')
         print(f'   Contributors: {len(result.get(\"contributors\", {}))}')
         "
@@ -114,10 +117,10 @@ jobs:
       run: |
         cd codesonor
         python -c "
-        from codesonor.dep_risk import DependencyRiskAnalyzer
+        from codesonor.dep_risk import DependencyRisk
         from pathlib import Path
-        analyzer = DependencyRiskAnalyzer(Path('../test-repo'))
-        result = analyzer.analyze()
+        analyzer = DependencyRisk(Path('../test-repo'))
+        result = analyzer.analyze_dependencies()
         print('✅ Dependency Risk:', 'PASS' if 'dependencies' in result else 'FAIL')
         print(f'   Dependencies found: {len(result.get(\"dependencies\", []))}')
         "
@@ -126,10 +129,10 @@ jobs:
       run: |
         cd codesonor
         python -c "
-        from codesonor.forecaster import CodeForecaster
+        from codesonor.forecaster import CodeClimatePredictor
         from pathlib import Path
-        forecaster = CodeForecaster(Path('../test-repo'))
-        result = forecaster.predict()
+        forecaster = CodeClimatePredictor(Path('../test-repo'))
+        result = forecaster.forecast_quality()
         print('✅ Code Forecaster:', 'PASS' if 'predictions' in result else 'FAIL')
         "
     
@@ -140,7 +143,7 @@ jobs:
         from codesonor.onboarding import OnboardingAssistant
         from pathlib import Path
         assistant = OnboardingAssistant(Path('../test-repo'))
-        result = assistant.generate_plan()
+        result = assistant.create_code_tour()
         print('✅ Onboarding Assistant:', 'PASS' if 'learning_path' in result else 'FAIL')
         print(f'   Critical files identified: {len(result.get(\"critical_files\", []))}')
         "
@@ -152,7 +155,7 @@ jobs:
         from codesonor.smart_smell import SmartSmellDetector
         from pathlib import Path
         detector = SmartSmellDetector(Path('../test-repo'))
-        result = detector.analyze()
+        result = detector.detect_smells()
         print('✅ Smart Smell Detector:', 'PASS' if 'smells' in result else 'FAIL')
         print(f'   Smells detected: {len(result.get(\"smells\", []))}')
         "
@@ -164,7 +167,7 @@ jobs:
         from codesonor.license_matrix import LicenseMatrix
         from pathlib import Path
         matrix = LicenseMatrix(Path('../test-repo'))
-        result = matrix.analyze()
+        result = matrix.analyze_licenses()
         print('✅ License Matrix:', 'PASS' if 'project_license' in result else 'FAIL')
         "
     
@@ -175,7 +178,7 @@ jobs:
         from codesonor.perf_predictor import PerformancePredictor
         from pathlib import Path
         predictor = PerformancePredictor(Path('../test-repo'))
-        result = predictor.analyze()
+        result = predictor.analyze_performance()
         print('✅ Performance Predictor:', 'PASS' if 'summary' in result else 'FAIL')
         print(f'   Bottlenecks found: {len(result.get(\"bottlenecks\", []))}')
         "
@@ -187,7 +190,7 @@ jobs:
         from codesonor.review_tutor import ReviewTutor
         from pathlib import Path
         tutor = ReviewTutor(Path('../test-repo'))
-        result = tutor.review()
+        result = tutor.conduct_review()
         print('✅ Review Tutor:', 'PASS' if 'reviews' in result else 'FAIL')
         "
     
@@ -198,7 +201,7 @@ jobs:
         from codesonor.portability import PortabilityAnalyzer
         from pathlib import Path
         analyzer = PortabilityAnalyzer(Path('../test-repo'))
-        result = analyzer.analyze()
+        result = analyzer.analyze_dependencies()
         print('✅ Portability Analyzer:', 'PASS' if 'portability_score' in result else 'FAIL')
         print(f'   Portability score: {result.get(\"portability_score\", 0)}')
         "
@@ -210,7 +213,7 @@ jobs:
         from codesonor.team_health import TeamHealthAnalyzer
         from pathlib import Path
         analyzer = TeamHealthAnalyzer(Path('../test-repo'))
-        result = analyzer.analyze()
+        result = analyzer.analyze_dependencies()
         print('✅ Team Health:', 'PASS' if 'health_score' in result else 'FAIL')
         print(f'   Health score: {result.get(\"health_score\", 0)}')
         "
@@ -244,7 +247,7 @@ jobs:
         from codesonor.cross_repo import CrossRepoIntelligence
         from pathlib import Path
         intelligence = CrossRepoIntelligence(Path('.'))
-        result = intelligence.analyze(language='Python', topic='testing')
+        result = intelligence.compare_with_best_practices(language='Python', topic='testing')
         print('✅ Cross-Repo Intelligence:', 'PASS' if 'similar_projects' in result else 'FAIL')
         if 'similar_projects' in result:
             print(f'   Similar projects found: {len(result[\"similar_projects\"])}')
@@ -285,8 +288,8 @@ jobs:
         features = [
             ('archaeology', 'CodeArchaeology'),
             ('team_dna', 'TeamDNA'),
-            ('dep_risk', 'DependencyRiskAnalyzer'),
-            ('forecaster', 'CodeForecaster'),
+            ('dep_risk', 'DependencyRisk'),
+            ('forecaster', 'CodeClimatePredictor'),
             ('cross_repo', 'CrossRepoIntelligence'),
             ('onboarding', 'OnboardingAssistant'),
             ('smart_smell', 'SmartSmellDetector'),
@@ -304,8 +307,20 @@ jobs:
                 instance = cls(repo_path)
                 
                 # Call appropriate method
-                if hasattr(instance, 'analyze'):
-                    result = instance.analyze()
+                if hasattr(instance, 'analyze_evolution'):
+                    result = instance.analyze_evolution()
+                elif hasattr(instance, 'analyze_contributors'):
+                    result = instance.analyze_contributors()
+                elif hasattr(instance, 'analyze_dependencies'):
+                    result = instance.analyze_dependencies()
+                elif hasattr(instance, 'analyze_licenses'):
+                    result = instance.analyze_licenses()
+                elif hasattr(instance, 'analyze_performance'):
+                    result = instance.analyze_performance()
+                elif hasattr(instance, 'analyze_portability'):
+                    result = instance.analyze_portability()
+                elif hasattr(instance, 'analyze_team_health'):
+                    result = instance.analyze_team_health()
                 elif hasattr(instance, 'predict'):
                     result = instance.predict()
                 elif hasattr(instance, 'generate_plan'):
@@ -423,16 +438,16 @@ jobs:
         print('=' * 50)
         
         from codesonor.archaeology import CodeArchaeology
-        benchmark_feature('Code Archaeology', lambda: CodeArchaeology(repo_path).analyze())
+        benchmark_feature('Code Archaeology', lambda: CodeArchaeology(repo_path).analyze_evolution())
         
         from codesonor.team_dna import TeamDNA
-        benchmark_feature('Team DNA', lambda: TeamDNA(repo_path).analyze())
+        benchmark_feature('Team DNA', lambda: TeamDNA(repo_path).analyze_contributors())
         
         from codesonor.smart_smell import SmartSmellDetector
-        benchmark_feature('Smart Smell Detection', lambda: SmartSmellDetector(repo_path).analyze())
+        benchmark_feature('Smart Smell Detection', lambda: SmartSmellDetector(repo_path).detect_smells())
         
         from codesonor.perf_predictor import PerformancePredictor
-        benchmark_feature('Performance Predictor', lambda: PerformancePredictor(repo_path).analyze())
+        benchmark_feature('Performance Predictor', lambda: PerformancePredictor(repo_path).analyze_performance())
         
         print('=' * 50)
         
