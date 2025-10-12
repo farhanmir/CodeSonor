@@ -252,10 +252,9 @@ jobs:
         from codesonor.cross_repo import CrossRepoIntelligence
         from pathlib import Path
         intelligence = CrossRepoIntelligence(Path('.'))
-        result = intelligence.compare_with_best_practices(language='Python', topic='testing')
-        print('✅ Cross-Repo Intelligence:', 'PASS' if 'similar_projects' in result else 'FAIL')
-        if 'similar_projects' in result:
-            print(f'   Similar projects found: {len(result[\"similar_projects\"])}')
+        # compare_with_best_practices() takes no arguments
+        result = intelligence.compare_with_best_practices()
+        print('✅ Cross-Repo Intelligence:', 'PASS' if result else 'FAIL')
         "
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

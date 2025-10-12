@@ -292,12 +292,18 @@ def nested_loop(items):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(code)
             f.flush()
+            filename = f.name
 
-            predictor = PerformancePredictor(Path(f.name).parent)
-            result = predictor.analyze_performance()
+        # File is now closed, safe to analyze on Windows
+        predictor = PerformancePredictor(Path(filename).parent)
+        result = predictor.analyze_performance()
 
-            os.unlink(f.name)
-            assert result is not None
+        try:
+            os.unlink(filename)
+        except OSError:
+            pass  # Ignore cleanup errors
+
+        assert result is not None
 
 
 class TestReviewTutor:
