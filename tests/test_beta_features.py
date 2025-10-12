@@ -33,7 +33,7 @@ class TestCodeArchaeology:
         from codesonor.archaeology import CodeArchaeology
 
         archaeology = CodeArchaeology(temp_git_repo)
-        result = archaeology.analyze()
+        result = archaeology.analyze_evolution()
 
         assert "summary" in result
         assert "timeline" in result
@@ -44,7 +44,7 @@ class TestCodeArchaeology:
         from codesonor.archaeology import CodeArchaeology
 
         archaeology = CodeArchaeology(temp_git_repo)
-        result = archaeology.analyze()
+        result = archaeology.analyze_evolution()
 
         if "timeline" in result and result["timeline"]:
             timeline = result["timeline"]
@@ -67,7 +67,7 @@ class TestTeamDNA:
         from codesonor.team_dna import TeamDNA
 
         team_dna = TeamDNA(temp_git_repo)
-        result = team_dna.analyze()
+        result = team_dna.analyze_contributors()
 
         assert "contributors" in result
         assert "collaboration" in result
@@ -77,7 +77,7 @@ class TestTeamDNA:
         from codesonor.team_dna import TeamDNA
 
         team_dna = TeamDNA(temp_git_repo)
-        result = team_dna.analyze()
+        result = team_dna.analyze_contributors()
 
         assert result is not None
 
@@ -87,26 +87,26 @@ class TestDependencyRisk:
 
     def test_import(self):
         """Test that dep_risk module can be imported"""
-        from codesonor.dep_risk import DependencyRiskAnalyzer
+        from codesonor.dep_risk import DependencyRisk
 
         assert DependencyRiskAnalyzer is not None
 
     def test_risk_analysis(self, temp_python_project):
         """Test dependency risk analysis"""
-        from codesonor.dep_risk import DependencyRiskAnalyzer
+        from codesonor.dep_risk import DependencyRisk
 
-        analyzer = DependencyRiskAnalyzer(temp_python_project)
-        result = analyzer.analyze()
+        analyzer = DependencyRisk(temp_python_project)
+        result = analyzer.analyze_dependencies()
 
         assert "summary" in result
         assert "dependencies" in result
 
     def test_license_check(self, temp_python_project):
         """Test license compatibility checking"""
-        from codesonor.dep_risk import DependencyRiskAnalyzer
+        from codesonor.dep_risk import DependencyRisk
 
-        analyzer = DependencyRiskAnalyzer(temp_python_project)
-        result = analyzer.analyze()
+        analyzer = DependencyRisk(temp_python_project)
+        result = analyzer.analyze_dependencies()
 
         assert "licenses" in result
 
@@ -116,26 +116,26 @@ class TestForecaster:
 
     def test_import(self):
         """Test that forecaster module can be imported"""
-        from codesonor.forecaster import CodeForecaster
+        from codesonor.forecaster import CodeClimatePredictor
 
         assert CodeForecaster is not None
 
     def test_prediction(self, temp_git_repo):
         """Test code quality prediction"""
-        from codesonor.forecaster import CodeForecaster
+        from codesonor.forecaster import CodeClimatePredictor
 
-        forecaster = CodeForecaster(temp_git_repo)
-        result = forecaster.predict()
+        forecaster = CodeClimatePredictor(temp_git_repo)
+        result = forecaster.forecast_quality()
 
         assert "predictions" in result
         assert "trends" in result
 
     def test_ml_availability(self):
         """Test if ML dependencies are available"""
-        from codesonor.forecaster import CodeForecaster
+        from codesonor.forecaster import CodeClimatePredictor
 
-        forecaster = CodeForecaster(Path("."))
-        result = forecaster.predict()
+        forecaster = CodeClimatePredictor(Path("."))
+        result = forecaster.forecast_quality()
 
         # Should work even without ML libs (graceful degradation)
         assert result is not None
@@ -155,7 +155,7 @@ class TestCrossRepo:
         from codesonor.cross_repo import CrossRepoIntelligence
 
         intelligence = CrossRepoIntelligence(Path("."))
-        result = intelligence.analyze(language="Python", topic="testing")
+        result = intelligence.compare_with_best_practices(language="Python", topic="testing")
 
         assert "similar_projects" in result
 
@@ -164,7 +164,7 @@ class TestCrossRepo:
         from codesonor.cross_repo import CrossRepoIntelligence
 
         intelligence = CrossRepoIntelligence(Path("."))
-        result = intelligence.analyze(language="Python")
+        result = intelligence.compare_with_best_practices(language="Python")
 
         assert result is not None
 
@@ -183,7 +183,7 @@ class TestOnboarding:
         from codesonor.onboarding import OnboardingAssistant
 
         assistant = OnboardingAssistant(temp_python_project)
-        result = assistant.generate_plan()
+        result = assistant.create_code_tour()
 
         assert "learning_path" in result
         assert "critical_files" in result
@@ -193,7 +193,7 @@ class TestOnboarding:
         from codesonor.onboarding import OnboardingAssistant
 
         assistant = OnboardingAssistant(temp_python_project)
-        result = assistant.generate_plan()
+        result = assistant.create_code_tour()
 
         if "learning_path" in result:
             assert isinstance(result["learning_path"], list)
@@ -213,7 +213,7 @@ class TestSmartSmell:
         from codesonor.smart_smell import SmartSmellDetector
 
         detector = SmartSmellDetector(temp_python_file.parent)
-        result = detector.analyze()
+        result = detector.detect_smells()
 
         assert "smells" in result
         assert "summary" in result
@@ -223,7 +223,7 @@ class TestSmartSmell:
         from codesonor.smart_smell import SmartSmellDetector
 
         detector = SmartSmellDetector(temp_python_file.parent)
-        result = detector.analyze()
+        result = detector.detect_smells()
 
         assert result is not None
 
@@ -242,7 +242,7 @@ class TestLicenseMatrix:
         from codesonor.license_matrix import LicenseMatrix
 
         matrix = LicenseMatrix(temp_python_project)
-        result = matrix.analyze()
+        result = matrix.analyze_licenses()
 
         assert "project_license" in result
         assert "dependencies" in result
@@ -252,7 +252,7 @@ class TestLicenseMatrix:
         from codesonor.license_matrix import LicenseMatrix
 
         matrix = LicenseMatrix(temp_python_project)
-        result = matrix.analyze()
+        result = matrix.analyze_licenses()
 
         assert "conflicts" in result
 
@@ -271,7 +271,7 @@ class TestPerfPredictor:
         from codesonor.perf_predictor import PerformancePredictor
 
         predictor = PerformancePredictor(temp_python_file.parent)
-        result = predictor.analyze()
+        result = predictor.analyze_performance()
 
         assert "summary" in result
         assert "bottlenecks" in result
@@ -292,7 +292,7 @@ def nested_loop(items):
             f.flush()
 
             predictor = PerformancePredictor(Path(f.name).parent)
-            result = predictor.analyze()
+            result = predictor.analyze_performance()
 
             os.unlink(f.name)
             assert result is not None
@@ -312,7 +312,7 @@ class TestReviewTutor:
         from codesonor.review_tutor import ReviewTutor
 
         tutor = ReviewTutor(temp_python_file.parent)
-        result = tutor.review()
+        result = tutor.conduct_review(
 
         assert "reviews" in result
         assert "summary" in result
@@ -322,7 +322,7 @@ class TestReviewTutor:
         from codesonor.review_tutor import ReviewTutor
 
         tutor = ReviewTutor(temp_python_file.parent)
-        result = tutor.review()
+        result = tutor.conduct_review(
 
         if "quizzes" in result:
             assert isinstance(result["quizzes"], list)
@@ -342,7 +342,7 @@ class TestPortability:
         from codesonor.portability import PortabilityAnalyzer
 
         analyzer = PortabilityAnalyzer(temp_python_project)
-        result = analyzer.analyze()
+        result = analyzer.analyze_dependencies()
 
         assert "portability_score" in result
         assert "frameworks" in result
@@ -352,7 +352,7 @@ class TestPortability:
         from codesonor.portability import PortabilityAnalyzer
 
         analyzer = PortabilityAnalyzer(temp_python_project)
-        result = analyzer.analyze()
+        result = analyzer.analyze_dependencies()
 
         assert "migration_plan" in result
 
@@ -371,7 +371,7 @@ class TestTeamHealth:
         from codesonor.team_health import TeamHealthAnalyzer
 
         analyzer = TeamHealthAnalyzer(temp_git_repo)
-        result = analyzer.analyze()
+        result = analyzer.analyze_dependencies()
 
         assert "health_score" in result
         assert "bottlenecks" in result
@@ -381,7 +381,7 @@ class TestTeamHealth:
         from codesonor.team_health import TeamHealthAnalyzer
 
         analyzer = TeamHealthAnalyzer(temp_git_repo)
-        result = analyzer.analyze()
+        result = analyzer.analyze_dependencies()
 
         assert "collaboration" in result
 
@@ -527,7 +527,7 @@ class TestGracefulDegradation:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             archaeology = CodeArchaeology(Path(tmpdir))
-            result = archaeology.analyze()
+            result = archaeology.analyze_evolution()
 
             # Should return error dict, not crash
             assert result is not None
@@ -535,10 +535,10 @@ class TestGracefulDegradation:
 
     def test_forecaster_without_ml(self):
         """Test forecaster works without scikit-learn"""
-        from codesonor.forecaster import CodeForecaster
+        from codesonor.forecaster import CodeClimatePredictor
 
-        forecaster = CodeForecaster(Path("."))
-        result = forecaster.predict()
+        forecaster = CodeClimatePredictor(Path("."))
+        result = forecaster.forecast_quality()
 
         # Should work with fallback
         assert result is not None

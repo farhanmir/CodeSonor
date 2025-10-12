@@ -71,7 +71,7 @@ def test_archaeology(repo_path):
         from codesonor.archaeology import CodeArchaeology
 
         archaeology = CodeArchaeology(repo_path)
-        result = archaeology.analyze()
+        result = archaeology.analyze_evolution()
 
         if "error" in result:
             return "FAIL", result["error"]
@@ -91,7 +91,7 @@ def test_team_dna(repo_path):
         from codesonor.team_dna import TeamDNA
 
         team_dna = TeamDNA(repo_path)
-        result = team_dna.analyze()
+        result = team_dna.analyze_contributors()
 
         if "error" in result:
             return "FAIL", result["error"]
@@ -106,10 +106,10 @@ def test_team_dna(repo_path):
 def test_dep_risk(repo_path):
     """Test Dependency Risk Score feature"""
     try:
-        from codesonor.dep_risk import DependencyRiskAnalyzer
+        from codesonor.dep_risk import DependencyRisk
 
-        analyzer = DependencyRiskAnalyzer(repo_path)
-        result = analyzer.analyze()
+        analyzer = DependencyRisk(repo_path)
+        result = analyzer.analyze_dependencies()
 
         if "error" in result:
             return "WARN", result["error"]
@@ -125,10 +125,10 @@ def test_dep_risk(repo_path):
 def test_forecaster(repo_path):
     """Test Code Climate Prediction feature"""
     try:
-        from codesonor.forecaster import CodeForecaster
+        from codesonor.forecaster import CodeClimatePredictor
 
-        forecaster = CodeForecaster(repo_path)
-        result = forecaster.predict()
+        forecaster = CodeClimatePredictor(repo_path)
+        result = forecaster.forecast_quality()
 
         if "error" in result:
             return "WARN", result["error"]
@@ -146,7 +146,7 @@ def test_cross_repo(repo_path):
         from codesonor.cross_repo import CrossRepoIntelligence
 
         intelligence = CrossRepoIntelligence(repo_path)
-        result = intelligence.analyze(language="Python", topic="web")
+        result = intelligence.compare_with_best_practices(language="Python", topic="web")
 
         if "error" in result:
             return "WARN", result["error"]
@@ -164,7 +164,7 @@ def test_onboarding(repo_path):
         from codesonor.onboarding import OnboardingAssistant
 
         assistant = OnboardingAssistant(repo_path)
-        result = assistant.generate_plan()
+        result = assistant.create_code_tour()
 
         if "error" in result:
             return "FAIL", result["error"]
@@ -183,7 +183,7 @@ def test_smart_smell(repo_path):
         from codesonor.smart_smell import SmartSmellDetector
 
         detector = SmartSmellDetector(repo_path)
-        result = detector.analyze()
+        result = detector.detect_smells()
 
         if "error" in result:
             return "FAIL", result["error"]
@@ -202,7 +202,7 @@ def test_license_matrix(repo_path):
         from codesonor.license_matrix import LicenseMatrix
 
         matrix = LicenseMatrix(repo_path)
-        result = matrix.analyze()
+        result = matrix.analyze_licenses()
 
         if "error" in result:
             return "WARN", result["error"]
@@ -223,7 +223,7 @@ def test_perf_predictor(repo_path):
         from codesonor.perf_predictor import PerformancePredictor
 
         predictor = PerformancePredictor(repo_path)
-        result = predictor.analyze()
+        result = predictor.analyze_performance()
 
         if "error" in result:
             return "FAIL", result["error"]
@@ -242,7 +242,7 @@ def test_review_tutor(repo_path):
         from codesonor.review_tutor import ReviewTutor
 
         tutor = ReviewTutor(repo_path)
-        result = tutor.review()
+        result = tutor.conduct_review(str(repo_path / "src"))
 
         if "error" in result:
             return "FAIL", result["error"]
@@ -260,7 +260,7 @@ def test_portability(repo_path):
         from codesonor.portability import PortabilityAnalyzer
 
         analyzer = PortabilityAnalyzer(repo_path)
-        result = analyzer.analyze()
+        result = analyzer.analyze_portability()
 
         if "error" in result:
             return "FAIL", result["error"]
@@ -279,7 +279,7 @@ def test_team_health(repo_path):
         from codesonor.team_health import TeamHealthAnalyzer
 
         analyzer = TeamHealthAnalyzer(repo_path)
-        result = analyzer.analyze()
+        result = analyzer.analyze_team_health()
 
         if "error" in result:
             return "FAIL", result["error"]
