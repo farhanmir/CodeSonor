@@ -36,7 +36,7 @@ class TestCodeArchaeology:
         result = archaeology.analyze_evolution()
 
         assert "summary" in result
-        assert "timeline" in result
+        assert "quality_trend" in result
         assert "hotspots" in result
 
     def test_quality_trends(self, temp_git_repo):
@@ -155,7 +155,7 @@ class TestCrossRepo:
         from codesonor.cross_repo import CrossRepoIntelligence
 
         intelligence = CrossRepoIntelligence(Path("."))
-        result = intelligence.find_similar_projects(language="Python", topic="testing")
+        result = intelligence.analyze_similar_projects(language="Python", topic="testing")
 
         assert "similar_projects" in result or "error" in result
 
@@ -186,7 +186,7 @@ class TestOnboarding:
         assistant = OnboardingAssistant(temp_python_project)
         result = assistant.create_code_tour()
 
-        assert "learning_path" in result
+        assert "stops" in result
         assert "critical_files" in result
 
     def test_day_plan(self, temp_python_project):
@@ -246,7 +246,7 @@ class TestLicenseMatrix:
         result = matrix.analyze_licenses()
 
         assert "project_license" in result
-        assert "dependencies" in result
+        assert "dependency_licenses" in result
 
     def test_conflict_detection(self, temp_python_project):
         """Test license conflict detection"""
@@ -343,7 +343,7 @@ class TestPortability:
         from codesonor.portability import PortabilityAnalyzer
 
         analyzer = PortabilityAnalyzer(temp_python_project)
-        result = analyzer.analyze_dependencies()
+        result = analyzer.analyze_portability()
 
         assert "portability_score" in result
         assert "frameworks" in result
@@ -353,7 +353,7 @@ class TestPortability:
         from codesonor.portability import PortabilityAnalyzer
 
         analyzer = PortabilityAnalyzer(temp_python_project)
-        result = analyzer.analyze_dependencies()
+        result = analyzer.analyze_portability()
 
         assert "migration_plan" in result
 
@@ -372,7 +372,7 @@ class TestTeamHealth:
         from codesonor.team_health import TeamHealthAnalyzer
 
         analyzer = TeamHealthAnalyzer(temp_git_repo)
-        result = analyzer.analyze_dependencies()
+        result = analyzer.analyze_team_health()
 
         assert "health_score" in result
         assert "bottlenecks" in result
@@ -382,7 +382,7 @@ class TestTeamHealth:
         from codesonor.team_health import TeamHealthAnalyzer
 
         analyzer = TeamHealthAnalyzer(temp_git_repo)
-        result = analyzer.analyze_dependencies()
+        result = analyzer.analyze_team_health()
 
         assert "collaboration" in result
 
@@ -394,8 +394,10 @@ class TestTeamHealth:
 def temp_git_repo():
     """Create a temporary git repository for testing"""
     import subprocess
+    import gc
 
-    with tempfile.TemporaryDirectory() as tmpdir:
+    tmpdir = tempfile.mkdtemp()
+    try:
         repo_path = Path(tmpdir)
 
         # Initialize git repo
@@ -417,6 +419,28 @@ def temp_git_repo():
         )
 
         yield repo_path
+        
+        # Explicitly close any git repository handles (Windows fix)
+        try:
+            import git
+            git.repo.base.Repo.__del__ = lambda self: None
+        except:
+            pass
+        gc.collect()  # Force garbage collection to close file handles
+    finally:
+        # Clean up with retries for Windows
+        import shutil
+        import time
+        for i in range(3):
+            try:
+                shutil.rmtree(tmpdir, ignore_errors=False)
+                break
+            except (OSError, PermissionError):
+                if i < 2:
+                    time.sleep(0.1)
+                    gc.collect()
+                else:
+                    shutil.rmtree(tmpdir, ignore_errors=True)  # Give up and ignore
 
 
 @pytest.fixture
