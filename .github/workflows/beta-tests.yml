@@ -190,7 +190,12 @@ jobs:
         from codesonor.review_tutor import ReviewTutor
         from pathlib import Path
         tutor = ReviewTutor(Path('../test-repo'))
-        result = tutor.conduct_review()
+        # Find a Python file to review
+        py_files = list(Path('../test-repo').rglob('*.py'))
+        if py_files:
+            result = tutor.conduct_review(str(py_files[0]))
+        else:
+            result = {'error': 'No Python files found'}
         print('✅ Review Tutor:', 'PASS' if 'reviews' in result else 'FAIL')
         "
     
