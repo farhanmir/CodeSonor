@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codesonor"
-version = "0.5.0-beta"
+version = "0.5.0"
 description = "AI-Powered GitHub Repository Analyzer - 8 LLM providers, Code Archaeology, Team DNA, Dependency Risk, ML Forecasting, Cross-Repo Learning, and 7 more unique features"
 readme = "CLI_README.md"
 authors = [{name = "Farhan Mir"}]

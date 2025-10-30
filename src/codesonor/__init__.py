@@ -4,7 +4,7 @@ CodeSonor - AI-Powered GitHub Repository Analyzer
 A powerful CLI tool for analyzing GitHub repositories with AI-powered insights.
 Supports 8 LLM providers and advanced code analysis features.
 
-New in v0.5.0-beta:
+New in v0.5.0:
 - Code Archaeology: Historical evolution analysis
 - Team DNA: Contributor behavioral patterns
 - Dependency Risk Score: Supply chain health
@@ -19,7 +19,7 @@ New in v0.5.0-beta:
 - Team Health Insights: Collaboration analytics
 """
 
-__version__ = "0.5.0-beta"
+__version__ = "0.5.0"
 __author__ = "Farhan Mir"
 
 from .analyzer import RepositoryAnalyzer

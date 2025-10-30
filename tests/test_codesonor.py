@@ -128,7 +128,7 @@ class TestImports:
         import codesonor
 
         assert hasattr(codesonor, "__version__")
-        assert codesonor.__version__ == "0.5.0-beta"
+        assert codesonor.__version__ == "0.5.0"
 
 
 class TestLLMProviders:
