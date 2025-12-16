@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codesonor"
-version = "0.5.0"
+version = "0.5.1"
 description = "AI-Powered GitHub Repository Analyzer - 8 LLM providers, Code Archaeology, Team DNA, Dependency Risk, ML Forecasting, Cross-Repo Learning, and 7 more unique features"
 readme = "CLI_README.md"
 authors = [{name = "Farhan Mir"}]
@@ -36,6 +36,8 @@ dependencies = [
     "networkx>=3.0",
     "packaging>=23.0",
     "license-expression>=30.0.0",
+    "Flask>=3.0.0",
+    "Flask-CORS>=4.0.0",
 ]
 
 [project.optional-dependencies]

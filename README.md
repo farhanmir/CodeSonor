@@ -234,6 +234,4 @@ If you find CodeSonor useful, please consider giving it a star! ⭐
 
 See [V0.4.1_UPDATE.md](V0.4.1_UPDATE.md) for complete details.
 
----
-
-Made with ❤️ by [Farhan Mir](https://github.com/farhanmir)
+Made by [Farhan Mir](https://github.com/farhanmir)

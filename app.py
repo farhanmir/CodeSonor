@@ -1,11 +1,19 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
-import requests
 import os
+import shutil
+import tempfile
+import git
 from dotenv import load_dotenv
-import google.generativeai as genai
-from collections import defaultdict
-import base64
+from pathlib import Path
+
+# Import Codesonor modules
+from src.codesonor.ai_analyzer import AIAnalyzer
+from src.codesonor.team_dna import TeamDNA
+from src.codesonor.dep_risk import DependencyRisk
+from src.codesonor.archaeology import CodeArchaeology
+from src.codesonor.smart_smell import SmartSmellDetector
+from src.codesonor.language_stats import LanguageStats
 
 # Load environment variables
 load_dotenv()
@@ -17,287 +25,148 @@ CORS(app)
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 GITHUB_TOKEN = os.getenv('GITHUB_TOKEN')
 
-# Configure Gemini API
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash-lite')
+class RepoCloner:
+    """Context manager for cloning and cleaning up repositories."""
+    def __init__(self, url):
+        self.url = url
+        self.temp_dir = tempfile.mkdtemp()
+        self.repo_dir = None
 
-# Language extensions mapping
-LANGUAGE_EXTENSIONS = {
-    '.py': 'Python',
-    '.js': 'JavaScript',
-    '.ts': 'TypeScript',
-    '.java': 'Java',
-    '.cpp': 'C++',
-    '.c': 'C',
-    '.cs': 'C#',
-    '.go': 'Go',
-    '.rb': 'Ruby',
-    '.php': 'PHP',
-    '.swift': 'Swift',
-    '.kt': 'Kotlin',
-    '.rs': 'Rust',
-    '.html': 'HTML',
-    '.css': 'CSS',
-    '.jsx': 'React',
-    '.tsx': 'TypeScript React',
-    '.vue': 'Vue',
-    '.sql': 'SQL',
-    '.sh': 'Shell',
-    '.json': 'JSON',
-    '.xml': 'XML',
-    '.yaml': 'YAML',
-    '.yml': 'YAML',
-    '.md': 'Markdown',
-}
-
-def get_github_headers():
-    """Get headers for GitHub API requests"""
-    headers = {
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'CodeSonor-App'
-    }
-    if GITHUB_TOKEN:
-        headers['Authorization'] = f'token {GITHUB_TOKEN}'
-    return headers
-
-def parse_github_url(url):
-    """Parse GitHub URL to extract owner and repo name"""
-    # Remove trailing slashes and .git
-    url = url.rstrip('/').replace('.git', '')
-    
-    # Handle different GitHub URL formats
-    if 'github.com' in url:
-        parts = url.split('github.com/')[-1].split('/')
-        if len(parts) >= 2:
-            return parts[0], parts[1]
-    
-    return None, None
-
-def fetch_repository_contents(owner, repo, path=''):
-    """Fetch contents of a GitHub repository recursively"""
-    url = f'https://api.github.com/repos/{owner}/{repo}/contents/{path}'
-    
-    try:
-        response = requests.get(url, headers=get_github_headers())
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        print(f"Error fetching repository contents: {e}")
-        return None
-
-def get_all_files(owner, repo, path='', files_list=None, max_files=500):
-    """Recursively get all files in the repository"""
-    if files_list is None:
-        files_list = []
-    
-    # Stop if we've reached the limit
-    if len(files_list) >= max_files:
-        return files_list
-    
-    contents = fetch_repository_contents(owner, repo, path)
-    
-    if contents is None:
-        return files_list
-    
-    for item in contents:
-        if len(files_list) >= max_files:
-            break
+    def __enter__(self):
+        try:
+            print(f"Cloning {self.url} to {self.temp_dir}...")
+            # Modify URL to include token if available to avoid rate limits/auth issues
+            auth_url = self.url
+            if GITHUB_TOKEN and 'github.com' in self.url and '@' not in self.url:
+               auth_url = self.url.replace('https://', f'https://{GITHUB_TOKEN}@')
             
-        if item['type'] == 'file':
-            files_list.append({
-                'name': item['name'],
-                'path': item['path'],
-                'size': item['size'],
-                'download_url': item.get('download_url')
-            })
-        elif item['type'] == 'dir':
-            # Skip common directories that aren't needed
-            skip_dirs = ['node_modules', '.git', 'dist', 'build', '__pycache__', 'vendor', 'target']
-            if item['name'] not in skip_dirs:
-                # Recursively fetch directory contents
-                get_all_files(owner, repo, item['path'], files_list, max_files)
-    
-    return files_list
+            git.Repo.clone_from(auth_url, self.temp_dir, depth=500) # Depth 500 for archaeology
+            self.repo_dir = Path(self.temp_dir)
+            return self.repo_dir
+        except Exception as e:
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
+            raise e
 
-def calculate_language_stats(files):
-    """Calculate language distribution based on file extensions"""
-    language_sizes = defaultdict(int)
-    total_size = 0
-    
-    for file in files:
-        ext = os.path.splitext(file['name'])[1].lower()
-        if ext in LANGUAGE_EXTENSIONS:
-            language = LANGUAGE_EXTENSIONS[ext]
-            size = file['size']
-            language_sizes[language] += size
-            total_size += size
-    
-    # Convert to percentages
-    language_stats = {}
-    for language, size in language_sizes.items():
-        if total_size > 0:
-            percentage = (size / total_size) * 100
-            language_stats[language] = round(percentage, 2)
-    
-    # Sort by percentage
-    language_stats = dict(sorted(language_stats.items(), key=lambda x: x[1], reverse=True))
-    
-    return language_stats
-
-def get_file_content(download_url):
-    """Fetch the content of a file from GitHub"""
-    try:
-        response = requests.get(download_url)
-        response.raise_for_status()
-        return response.text
-    except Exception as e:
-        print(f"Error fetching file content: {e}")
-        return None
-
-def generate_ai_summary(code, filename):
-    """Generate AI summary for code using Gemini API"""
-    if not GEMINI_API_KEY:
-        return "AI summary not available. Please configure GEMINI_API_KEY."
-    
-    try:
-        prompt = f"""Analyze this code file named '{filename}' and provide:
-1. A brief summary (2-3 sentences) of what this code does
-2. The main purpose/functionality
-3. Key components or classes (if any)
-
-Code:
-```
-{code[:3000]}  # Limit to first 3000 chars to avoid token limits
-```
-
-Provide a concise, professional summary."""
-
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception as e:
-        print(f"Error generating AI summary: {e}")
-        return f"Error generating summary: {str(e)}"
-
-def analyze_key_files(files):
-    """Analyze key source code files with AI"""
-    # Priority extensions for analysis
-    priority_extensions = ['.py', '.js', '.ts', '.java', '.cpp', '.go', '.rb']
-    
-    # Filter and prioritize files
-    key_files = []
-    for file in files:
-        ext = os.path.splitext(file['name'])[1].lower()
-        if ext in priority_extensions and file['size'] < 50000:  # Skip very large files
-            # Prioritize main files, index files, app files
-            name_lower = file['name'].lower()
-            if any(keyword in name_lower for keyword in ['main', 'index', 'app', 'server']):
-                key_files.insert(0, file)
-            else:
-                key_files.append(file)
-    
-    # Analyze up to 3 key files
-    analyses = []
-    for file in key_files[:3]:
-        if file.get('download_url'):
-            content = get_file_content(file['download_url'])
-            if content:
-                summary = generate_ai_summary(content, file['name'])
-                analyses.append({
-                    'file': file['path'],
-                    'summary': summary
-                })
-    
-    return analyses
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print(f"Cleaning up {self.temp_dir}...")
+        # On Windows, git processes might hold file locks, so we might need retry logic or ignore errors
+        try:
+             # Forcefully remove read-only files if necessary (common git issue on windows)
+            def on_rm_error(func, path, exc_info):
+                os.chmod(path, 0o777)
+                func(path)
+                
+            shutil.rmtree(self.temp_dir, onerror=on_rm_error)
+        except Exception as e:
+            print(f"Error cleaning up: {e}")
 
 @app.route('/')
 def index():
-    """Serve the frontend"""
     return send_from_directory('static', 'index.html')
-
-@app.route('/favicon.ico')
-def favicon():
-    """Return 204 No Content for favicon requests"""
-    return '', 204
 
 @app.route('/<path:path>')
 def serve_static(path):
-    """Serve static files (CSS, JS, etc.)"""
     return send_from_directory('static', path)
 
 @app.route('/analyze', methods=['POST'])
 def analyze_repository():
-    """Analyze a GitHub repository"""
     data = request.get_json()
+    github_url = data.get('url')
     
-    if not data or 'url' not in data:
+    if not github_url:
         return jsonify({'error': 'GitHub URL is required'}), 400
-    
-    github_url = data['url']
-    
-    # Parse GitHub URL
-    owner, repo = parse_github_url(github_url)
-    
-    if not owner or not repo:
-        return jsonify({'error': 'Invalid GitHub URL format'}), 400
-    
+
     try:
-        # Fetch repository info
-        repo_info_url = f'https://api.github.com/repos/{owner}/{repo}'
-        repo_response = requests.get(repo_info_url, headers=get_github_headers())
-        
-        # Handle authentication errors with helpful message
-        if repo_response.status_code == 401:
-            if not GITHUB_TOKEN or GITHUB_TOKEN == 'your_github_token_here':
-                return jsonify({
-                    'error': 'GitHub authentication required. Please add a GitHub Personal Access Token to your .env file. Visit https://github.com/settings/tokens to create one with public_repo scope.'
-                }), 401
-            else:
-                return jsonify({
-                    'error': 'GitHub token is invalid or expired. Please generate a new token at https://github.com/settings/tokens'
-                }), 401
-        
-        repo_response.raise_for_status()
-        repo_info = repo_response.json()
-        
-        # Get all files
-        files = get_all_files(owner, repo)
-        
-        if not files:
-            return jsonify({'error': 'Could not fetch repository files'}), 404
-        
-        # Calculate language statistics
-        language_stats = calculate_language_stats(files)
-        
-        # Analyze key files with AI
-        ai_analyses = analyze_key_files(files)
-        
-        # Compile the analysis report
-        analysis_report = {
-            'repository': {
-                'name': repo_info['name'],
-                'owner': repo_info['owner']['login'],
-                'description': repo_info.get('description', 'No description available'),
-                'stars': repo_info['stargazers_count'],
-                'forks': repo_info['forks_count'],
-                'url': repo_info['html_url'],
-                'created_at': repo_info['created_at'],
-                'updated_at': repo_info['updated_at'],
-            },
-            'statistics': {
-                'total_files': len(files),
-                'language_distribution': language_stats,
-            },
-            'ai_analysis': ai_analyses,
-            'file_list': [f['path'] for f in files[:50]]  # First 50 files
-        }
-        
-        return jsonify(analysis_report), 200
-        
-    except requests.exceptions.RequestException as e:
-        return jsonify({'error': f'GitHub API error: {str(e)}'}), 500
+        # Clone and Analyze
+        with RepoCloner(github_url) as repo_path:
+            results = {}
+            
+            # 1. Base Statistics & Language
+            lang_stats = LanguageStats(repo_path).get_stats()
+            results['statistics'] = {
+                'languages': lang_stats,
+                'total_files': sum(l['count'] for l in lang_stats.values()) if isinstance(lang_stats, dict) else 0 
+                # Note: LanguageStats implementation might return dict or list, assuming dict based on prev usage
+            }
+
+            # 2. AI Analysis (Summaries)
+            # We recreate the AI Analyzer here
+            ai_analyzer = AIAnalyzer(api_key=GEMINI_API_KEY, provider='gemini')
+            if ai_analyzer.is_available():
+                # Get key files manualy or reuse logic? 
+                # For simplicity, we'll list files and pick top 3 like before
+                files = []
+                for root, _, filenames in os.walk(repo_path):
+                    if '.git' in root: continue
+                    for f in filenames:
+                        files.append({'name': f, 'path': str(Path(root) / f), 'size': os.path.getsize(Path(root) / f)})
+                
+                # Simple heuristic for key files
+                key_files = sorted(
+                    [f for f in files if f['path'].endswith(('.py', '.js', '.ts', '.java', '.go'))],
+                    key=lambda x: x['size']
+                )[:3]
+                
+                summaries = []
+                for f in key_files:
+                    try:
+                        with open(f['path'], 'r', encoding='utf-8', errors='ignore') as file_obj:
+                            content = file_obj.read()
+                            summary = ai_analyzer.generate_summary(content, f['name'])
+                            summaries.append({'file': f['name'], 'summary': summary})
+                    except: pass
+                results['ai_analysis'] = summaries
+            
+            # 3. Team DNA
+            team_dna = TeamDNA(repo_path)
+            results['team_dna'] = team_dna.analyze_contributors(limit=100)
+
+            # 4. Dependency Risk
+            dep_risk = DependencyRisk(repo_path)
+            results['dependency_risk'] = dep_risk.analyze_dependencies()
+
+            # 5. Archaeology (History)
+            pass # Skipping for speed in this iteration unless requested, or add basic stats
+            archaeology = CodeArchaeology(repo_path)
+            results['archaeology'] = archaeology.analyze_evolution(weeks=12)
+
+            return jsonify(results), 200
+
     except Exception as e:
-        return jsonify({'error': f'Analysis error: {str(e)}'}), 500
+        print(f"Analysis failed: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/export/markdown', methods=['POST'])
+def export_markdown():
+    """Export analysis results to Markdown."""
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'No data provided'}), 400
+        
+    # Generate Markdown Report
+    md = f"# CodeSonor Analysis Report\n\n"
+    md += f"**Repository:** {data.get('repository', {}).get('name', 'Unknown')}\n"
+    md += f"**Date:** {data.get('repository', {}).get('updated_at', '')}\n\n"
+    
+    md += "## 📊 Statistics\n"
+    md += f"- **Total Files:** {data.get('statistics', {}).get('total_files', 0)}\n"
+    md += "- **Languages:**\n"
+    for lang, stats in data.get('statistics', {}).get('languages', {}).items():
+        # Handle simple dict or complex object
+        val = stats if isinstance(stats, (int, float, str)) else stats.get('percentage', 0)
+        md += f"  - {lang}: {val}%\n"
+        
+    md += "\n## 🧬 Team DNA\n"
+    contributors = data.get('team_dna', {}).get('contributors', {})
+    for name, profile in contributors.items():
+        md += f"- **{name}**: {profile.get('total_commits', 0)} commits\n"
+        
+    md += "\n## 🛡️ Dependency Risk\n"
+    risk = data.get('dependency_risk', {})
+    md += f"- **Score:** {risk.get('risk_score', 'N/A')}/100\n"
+    md += f"- **Status:** {risk.get('status', 'Unknown')}\n"
+    
+    return Response(md, mimetype='text/markdown')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

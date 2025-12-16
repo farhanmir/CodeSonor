@@ -27,7 +27,7 @@ if not exist ".env" (
 
 REM Install/update dependencies
 echo Installing/updating dependencies...
-pip install -q -r requirements.txt
+pip install -q .
 echo.
 
 REM Start the Flask application
